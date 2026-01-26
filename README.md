@@ -128,10 +128,10 @@ The CLI follows a deterministic, fully automated sequence with preflight validat
 
 #### Potential Failure Points
 
-- **Preflight**: missing `ffmpeg`, `client_secrets.json`, or required `.env` keys.
-- **OpenAI**: quota errors or invalid API key.
-- **Video render**: MoviePy/ffmpeg issues on PATH or temp file permissions.
-- **Upload**: OAuth consent errors or quota limits.
+- **Preflight**: missing `ffmpeg`, `client_secrets.json`, or required `.env` keys (see [TROUBLESHOOTING.md](TROUBLESHOOTING.md)).
+- **OpenAI**: quota errors or invalid API key (verify keys/usage in OpenAI dashboard).
+- **Video render**: MoviePy/ffmpeg issues on PATH or temp file permissions (reinstall ffmpeg and retry).
+- **Upload**: OAuth consent errors or quota limits (re-auth via `client_secrets.json` and check YouTube API quota).
 
 ### Method 3: Automated Scheduling
 

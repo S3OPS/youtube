@@ -41,10 +41,9 @@ def run_preflight_checks():
         'PIL': 'pillow',
         'pyttsx3': 'pyttsx3'
     }
-    find_spec = importlib.util.find_spec
     missing_packages = []
     for module, package in required_modules.items():
-        if find_spec(module) is None:
+        if importlib.util.find_spec(module) is None:
             missing_packages.append(package)
     if missing_packages:
         errors.append(
@@ -55,14 +54,13 @@ def run_preflight_checks():
     if AutomationEngine is None:
         errors.append("Automation engine unavailable (install dependencies and retry)")
 
-    try:
-        if not shutil.which('ffmpeg'):
-            raise FileNotFoundError
-        subprocess.run(['ffmpeg', '-version'], capture_output=True, text=True, check=True)
-    except FileNotFoundError:
+    if not shutil.which('ffmpeg'):
         errors.append("ffmpeg is not installed (required for video rendering)")
-    except subprocess.CalledProcessError:
-        errors.append("ffmpeg check failed (ensure ffmpeg runs from your PATH)")
+    else:
+        try:
+            subprocess.run(['ffmpeg', '-version'], capture_output=True, text=True, check=True)
+        except subprocess.CalledProcessError:
+            errors.append("ffmpeg check failed (ensure ffmpeg runs from your PATH)")
 
     required_vars = ['OPENAI_API_KEY', 'AMAZON_AFFILIATE_TAG']
     missing_vars = [var for var in required_vars if not os.getenv(var)]
