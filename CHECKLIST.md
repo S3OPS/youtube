@@ -10,10 +10,7 @@ This checklist has been consolidated to reduce duplicate setup steps.
 
 ## ✅ Minimal Verification
 
-- [ ] Run the setup wizard:
-  ```bash
-  python setup.py
-  ```
+- [ ] Follow [QUICKSTART.md](QUICKSTART.md) for setup steps
 - [ ] Run the full-auto CLI (preflight checks included):
   ```bash
   python create_video.py
@@ -85,31 +82,7 @@ If something doesn't work, check:
 
 ### Common Issues
 
-**"ffmpeg not found"**
-- [ ] Install ffmpeg for your OS
-- [ ] Verify with `ffmpeg -version`
-
-**"Invalid API key"**
-- [ ] Check `.env` file for typos
-- [ ] Ensure no quotes around the key
-- [ ] Verify key at https://platform.openai.com/api-keys
-
-**"YouTube upload failed"**
-- [ ] Verify `client_secrets.json` exists
-- [ ] Check file is valid JSON
-- [ ] Complete OAuth flow when prompted
-- [ ] Check YouTube API is enabled
-
-**"Module not found"**
-- [ ] Run `pip install -r requirements.txt`
-- [ ] Use virtual environment if needed
-- [ ] Check Python version (3.8+)
-
-**Video creation is slow**
-- [ ] This is normal (2-5 minutes per video)
-- [ ] AI generation takes time
-- [ ] Video rendering requires processing
-- [ ] YouTube upload depends on connection
+See [TROUBLESHOOTING.md](TROUBLESHOOTING.md) for the full list of setup issues and fixes.
 
 ### Getting Help
 
