@@ -6,8 +6,11 @@ Run this script to create and upload a video immediately
 import os
 import sys
 import subprocess
-from dotenv import load_dotenv
-from automation_engine import AutomationEngine
+import importlib.util
+try:
+    from dotenv import load_dotenv
+except ImportError:
+    load_dotenv = None
 
 
 def run_preflight_checks():
@@ -17,6 +20,25 @@ def run_preflight_checks():
 
     if sys.version_info < (3, 8):
         errors.append(f"Python 3.8+ required (current: {sys.version.split()[0]})")
+
+    required_modules = {
+        'dotenv': 'python-dotenv',
+        'openai': 'openai',
+        'googleapiclient': 'google-api-python-client',
+        'google_auth_oauthlib': 'google-auth-oauthlib',
+        'gtts': 'gtts',
+        'moviepy': 'moviepy',
+        'schedule': 'schedule'
+    }
+    missing_packages = [
+        package for module, package in required_modules.items()
+        if importlib.util.find_spec(module) is None
+    ]
+    if missing_packages:
+        errors.append(
+            f"Missing Python packages: {', '.join(missing_packages)} "
+            "(run: pip install -r requirements.txt)"
+        )
 
     try:
         subprocess.run(['ffmpeg', '-version'], capture_output=True, text=True, check=True)
@@ -54,7 +76,8 @@ def main():
     """)
     
     # Load environment variables
-    load_dotenv()
+    if load_dotenv:
+        load_dotenv()
 
     if not run_preflight_checks():
         sys.exit(1)
@@ -77,6 +100,7 @@ def main():
     print()
     
     # Initialize automation engine
+    from automation_engine import AutomationEngine
     automation = AutomationEngine(config)
     
     # Create and upload video
