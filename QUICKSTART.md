@@ -38,7 +38,7 @@ If you prefer manual setup, copy `.env.example` and fill in the required keys.
 
 Create OAuth credentials in Google Cloud and download `client_secrets.json` to the project root.
 
-### Step 5: Run! (10 seconds)
+### Step 4: Run! (10 seconds)
 
 **Option A: Web Dashboard**
 ```bash
