@@ -95,7 +95,7 @@ A **complete, production-ready system** for fully automated YouTube content crea
    - Integration patterns
    - Advanced workflows
 
-6. **CHECKLIST.md** - Getting started guide
+6. **CHECKLIST.md** - Getting started guide (consolidated)
    - Step-by-step verification
    - Troubleshooting embedded
    - Success criteria

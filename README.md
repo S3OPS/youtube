@@ -114,6 +114,25 @@ Create a single video immediately:
 python create_video.py
 ```
 
+#### QA Automation Logic (Full-Auto CLI)
+
+The CLI follows a deterministic, fully automated sequence with preflight validation:
+
+1. **Preflight checks**: Verify Python version, ffmpeg availability, required `.env` variables, and `client_secrets.json`.
+2. **Generate script**: Use OpenAI to create the narration.
+3. **Generate metadata**: Produce title + description, extract affiliate keywords.
+4. **Affiliate links**: Append Amazon links + disclosure to the description.
+5. **Render video**: Text-to-speech → MP4 generation.
+6. **Upload**: Push to YouTube with metadata + privacy settings.
+7. **Persist history**: Record results in `automation_history.json`.
+
+#### Potential Failure Points
+
+- **Preflight**: missing `ffmpeg`, `client_secrets.json`, or required `.env` keys.
+- **OpenAI**: quota errors or invalid API key.
+- **Video render**: MoviePy/ffmpeg issues on PATH or temp file permissions.
+- **Upload**: OAuth consent errors or quota limits.
+
 ### Method 3: Automated Scheduling
 
 Run the automation on a schedule:

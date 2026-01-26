@@ -118,4 +118,4 @@ ffmpeg -version  # Test if installed
 
 ---
 
-**Need help?** Open an issue on GitHub!
+**Need help?** See [TROUBLESHOOTING.md](TROUBLESHOOTING.md) or open an issue on GitHub!

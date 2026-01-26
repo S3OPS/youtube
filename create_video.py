@@ -5,8 +5,43 @@ Run this script to create and upload a video immediately
 
 import os
 import sys
+import subprocess
 from dotenv import load_dotenv
 from automation_engine import AutomationEngine
+
+
+def run_preflight_checks():
+    """Run preflight checks for the full automation workflow."""
+    print("Step 0: Running preflight checks...")
+    errors = []
+
+    if sys.version_info < (3, 8):
+        errors.append(f"Python 3.8+ required (current: {sys.version.split()[0]})")
+
+    try:
+        subprocess.run(['ffmpeg', '-version'], capture_output=True, text=True, check=True)
+    except FileNotFoundError:
+        errors.append("ffmpeg is not installed (required for video rendering)")
+    except subprocess.CalledProcessError:
+        errors.append("ffmpeg check failed (ensure ffmpeg runs from your PATH)")
+
+    required_vars = ['OPENAI_API_KEY', 'AMAZON_AFFILIATE_TAG']
+    missing_vars = [var for var in required_vars if not os.getenv(var)]
+    if missing_vars:
+        errors.append(f"Missing required environment variables: {', '.join(missing_vars)}")
+
+    if not os.path.exists('client_secrets.json'):
+        errors.append("client_secrets.json not found (required for YouTube upload)")
+
+    if errors:
+        print("❌ Preflight checks failed:")
+        for error in errors:
+            print(f"   - {error}")
+        print("\nResolve the issues above and try again.")
+        return False
+
+    print("✅ Preflight checks passed.\n")
+    return True
 
 
 def main():
@@ -20,16 +55,8 @@ def main():
     
     # Load environment variables
     load_dotenv()
-    
-    # Check for required environment variables
-    required_vars = ['OPENAI_API_KEY', 'AMAZON_AFFILIATE_TAG']
-    missing_vars = [var for var in required_vars if not os.getenv(var)]
-    
-    if missing_vars:
-        print(f"❌ Error: Missing required environment variables:")
-        for var in missing_vars:
-            print(f"   - {var}")
-        print("\nPlease create a .env file based on .env.example")
+
+    if not run_preflight_checks():
         sys.exit(1)
     
     # Initialize configuration
