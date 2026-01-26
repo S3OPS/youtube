@@ -29,9 +29,9 @@ def run_preflight_checks():
     required_modules = {
         'dotenv': 'python-dotenv',
         'openai': 'openai',
-        'googleapiclient': 'google-api-python-client',
-        'google_auth_oauthlib': 'google-auth-oauthlib',
-        'google_auth_httplib2': 'google-auth-httplib2',
+        'googleapiclient.discovery': 'google-api-python-client',
+        'google.auth_oauthlib': 'google-auth-oauthlib',
+        'google.auth_httplib2': 'google-auth-httplib2',
         'gtts': 'gtts',
         'moviepy': 'moviepy',
         'schedule': 'schedule',
