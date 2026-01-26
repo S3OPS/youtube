@@ -105,7 +105,7 @@ class AutomationEngine:
             print("\nStep 4: Creating video...")
             video_file = self.video_creator.create_simple_video(script, title)
             if not video_file:
-                raise Exception("Failed to create video")
+                raise Exception("Video creation failed - video_creator.create_simple_video returned None")
             print(f"Video created: {video_file}")
             entry['video_file'] = video_file
             

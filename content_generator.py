@@ -14,7 +14,7 @@ class ContentGenerator:
     def __init__(self, api_key, topic="technology"):
         """Initialize the content generator with OpenAI API key"""
         self.api_key = api_key
-        openai.api_key = api_key
+        self.client = openai.OpenAI(api_key=api_key)
         self.topic = topic
         
     def generate_video_script(self, topic=None):
@@ -35,7 +35,7 @@ class ContentGenerator:
         Format the script as spoken narration only, no stage directions."""
         
         try:
-            response = openai.chat.completions.create(
+            response = self.client.chat.completions.create(
                 model="gpt-3.5-turbo",
                 messages=[
                     {"role": "system", "content": "You are a professional YouTube content creator."},
@@ -67,7 +67,7 @@ class ContentGenerator:
         }}"""
         
         try:
-            response = openai.chat.completions.create(
+            response = self.client.chat.completions.create(
                 model="gpt-3.5-turbo",
                 messages=[
                     {"role": "system", "content": "You are a YouTube SEO expert."},
@@ -94,7 +94,7 @@ class ContentGenerator:
         Return as a simple list, one keyword per line."""
         
         try:
-            response = openai.chat.completions.create(
+            response = self.client.chat.completions.create(
                 model="gpt-3.5-turbo",
                 messages=[
                     {"role": "system", "content": "You are an e-commerce product expert."},

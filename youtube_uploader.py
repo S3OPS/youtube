@@ -53,7 +53,7 @@ class YouTubeUploader:
         return True
     
     def upload_video(self, video_file, title, description, category_id='22', 
-                     privacy_status='public', tags=None):
+                     privacy_status='public', tags=None, made_for_kids=False):
         """
         Upload a video to YouTube
         
@@ -64,6 +64,7 @@ class YouTubeUploader:
             category_id: YouTube category ID (22 = People & Blogs)
             privacy_status: 'public', 'private', or 'unlisted'
             tags: List of tags for the video
+            made_for_kids: Whether content is made for kids (COPPA compliance)
         
         Returns:
             Video ID if successful, None otherwise
@@ -85,14 +86,14 @@ class YouTubeUploader:
             },
             'status': {
                 'privacyStatus': privacy_status,
-                'selfDeclaredMadeForKids': False
+                'selfDeclaredMadeForKids': made_for_kids
             }
         }
         
-        # Create MediaFileUpload object
+        # Create MediaFileUpload object with 1MB chunks for better progress tracking
         media = MediaFileUpload(
             video_file,
-            chunksize=-1,
+            chunksize=1024*1024,  # 1MB chunks
             resumable=True,
             mimetype='video/mp4'
         )

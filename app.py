@@ -55,7 +55,13 @@ def get_history():
 
 @app.route('/api/create', methods=['POST'])
 def create_video():
-    """Trigger video creation"""
+    """
+    Trigger video creation
+    
+    Note: This runs synchronously and may take 2-5 minutes to complete.
+    For production use, consider implementing a task queue (e.g., Celery, RQ)
+    to handle video creation asynchronously.
+    """
     try:
         # Run in a separate thread to avoid blocking
         def run_creation():
