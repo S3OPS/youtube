@@ -102,9 +102,6 @@ cp .env.example .env
 
 # Or run setup wizard
 python setup.py
-
-# Verify .env exists
-cat .env
 ```
 
 ### Invalid OpenAI API Key

@@ -14,77 +14,12 @@ A **100% fully automated** content creation system that generates videos with AI
 
 ## 🚀 Quick Start
 
-### Prerequisites
+For step-by-step setup, see [QUICKSTART.md](QUICKSTART.md). In short:
 
-- Python 3.8-3.13 (Pillow/lxml wheels are not available for Python 3.14)
-- OpenAI API key
-- Amazon Affiliate account
-- YouTube account with API access
-- ffmpeg installed (for video creation)
-
-### Installation
-
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/S3OPS/youtube.git
-   cd youtube
-   ```
-
-2. **Install dependencies**
-   ```bash
-   pip install -r requirements.txt
-   ```
-
-3. **Install ffmpeg** (required for video creation)
-   
-   **Ubuntu/Debian:**
-   ```bash
-   sudo apt-get update
-   sudo apt-get install ffmpeg
-   ```
-   
-   **macOS:**
-   ```bash
-   brew install ffmpeg
-   ```
-   
-   **Windows:**
-   Download from https://ffmpeg.org/download.html
-
-4. **Configure environment variables**
-   ```bash
-   cp .env.example .env
-   # Edit .env with your API keys and settings
-   ```
-
-5. **Set up YouTube API credentials**
-   - Go to [Google Cloud Console](https://console.cloud.google.com/)
-   - Create a new project or select existing one
-   - Enable YouTube Data API v3
-   - Create OAuth 2.0 credentials
-   - Download the credentials as `client_secrets.json`
-   - Place in the project root directory
-
-### Configuration
-
-Edit `.env` file with your credentials:
-
-```env
-# OpenAI API Key (required)
-OPENAI_API_KEY=sk-your-openai-api-key-here
-
-# Amazon Affiliate Tag (required)
-AMAZON_AFFILIATE_TAG=youraffid-20
-
-# Content Settings
-CONTENT_TOPIC=technology
-CONTENT_FREQUENCY=daily
-VIDEO_DURATION=60
-
-# Server Settings
-FLASK_PORT=5000
-FLASK_HOST=0.0.0.0
-```
+1. Install dependencies and ffmpeg.
+2. Configure `.env` (run `python setup.py` or copy `.env.example` and fill in required keys).
+3. Add `client_secrets.json` for YouTube API access.
+4. Run `python app.py` or `python create_video.py`.
 
 ## 📖 Usage
 
@@ -113,25 +48,6 @@ Create a single video immediately:
 ```bash
 python create_video.py
 ```
-
-#### QA Automation Logic (Full-Auto CLI)
-
-The CLI follows a deterministic, fully automated sequence with preflight validation:
-
-1. **Preflight checks**: Verify Python version, ffmpeg availability, required `.env` variables, and `client_secrets.json`.
-2. **Generate script**: Use OpenAI to create the narration.
-3. **Generate metadata**: Produce title + description, extract affiliate keywords.
-4. **Affiliate links**: Append Amazon links + disclosure to the description.
-5. **Render video**: Text-to-speech → MP4 generation.
-6. **Upload**: Push to YouTube with metadata + privacy settings.
-7. **Persist history**: Record results in `automation_history.json`.
-
-#### Potential Failure Points
-
-- **Preflight**: missing `ffmpeg`, `client_secrets.json`, or required `.env` keys (see [TROUBLESHOOTING.md](TROUBLESHOOTING.md)).
-- **OpenAI**: quota errors or invalid API key (verify keys/usage in OpenAI dashboard).
-- **Video render**: MoviePy/ffmpeg issues on PATH or temp file permissions (reinstall ffmpeg and retry).
-- **Upload**: OAuth consent errors or quota limits (re-auth via `client_secrets.json` and check YouTube API quota).
 
 ### Method 3: Automated Scheduling
 
@@ -246,19 +162,7 @@ Discover the most innovative tech gadgets that will transform your daily life...
 
 ## 🐛 Troubleshooting
 
-**Video creation fails:**
-- Ensure ffmpeg is installed: `ffmpeg -version`
-- Check that all dependencies are installed
-
-**YouTube upload fails:**
-- Verify `client_secrets.json` is in the root directory
-- Check that YouTube Data API v3 is enabled
-- Ensure you've completed OAuth authentication
-
-**No content generated:**
-- Verify your OpenAI API key is valid
-- Check your OpenAI API usage/credits
-- Review the activity log in the dashboard
+See [TROUBLESHOOTING.md](TROUBLESHOOTING.md) for common setup issues and fixes.
 
 ## 📝 Customization
 
