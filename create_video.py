@@ -97,10 +97,6 @@ def main():
     if not run_preflight_checks():
         sys.exit(1)
 
-    if AutomationEngine is None:
-        print("❌ Automation engine unavailable. Install dependencies with: pip install -r requirements.txt")
-        sys.exit(1)
-    
     # Initialize configuration
     config = {
         'openai_api_key': os.getenv('OPENAI_API_KEY'),
