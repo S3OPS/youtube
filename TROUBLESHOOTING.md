@@ -25,7 +25,7 @@ Common issues and their solutions.
 # Check your Python version
 python3 --version
 
-# Install Python 3.8+ if needed
+# Install Python 3.8-3.13 if needed (Pillow/lxml wheels are not available for 3.14 yet)
 # Ubuntu/Debian:
 sudo apt-get update
 sudo apt-get install python3.9
