@@ -11,6 +11,10 @@ try:
     from dotenv import load_dotenv
 except ImportError:
     load_dotenv = None
+try:
+    from automation_engine import AutomationEngine
+except ModuleNotFoundError:
+    AutomationEngine = None
 
 
 def run_preflight_checks():
@@ -99,8 +103,11 @@ def main():
     print(f"   Privacy: {config['video_privacy']}")
     print()
     
+    if AutomationEngine is None:
+        print("❌ Automation engine unavailable. Install dependencies with: pip install -r requirements.txt")
+        sys.exit(1)
+
     # Initialize automation engine
-    from automation_engine import AutomationEngine
     automation = AutomationEngine(config)
     
     # Create and upload video
