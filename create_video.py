@@ -7,6 +7,7 @@ import os
 import sys
 import subprocess
 import importlib.util
+import shutil
 try:
     from dotenv import load_dotenv
 except ImportError:
@@ -40,17 +41,23 @@ def run_preflight_checks():
         'PIL': 'pillow',
         'pyttsx3': 'pyttsx3'
     }
-    missing_packages = [
-        package for module, package in required_modules.items()
-        if importlib.util.find_spec(module) is None
-    ]
+    find_spec = importlib.util.find_spec
+    missing_packages = []
+    for module, package in required_modules.items():
+        if find_spec(module) is None:
+            missing_packages.append(package)
     if missing_packages:
         errors.append(
             f"Missing Python packages: {', '.join(missing_packages)} "
             "(run: pip install -r requirements.txt)"
         )
 
+    if AutomationEngine is None:
+        errors.append("Automation engine unavailable (install dependencies and retry)")
+
     try:
+        if not shutil.which('ffmpeg'):
+            raise FileNotFoundError
         subprocess.run(['ffmpeg', '-version'], capture_output=True, text=True, check=True)
     except FileNotFoundError:
         errors.append("ffmpeg is not installed (required for video rendering)")
@@ -109,10 +116,6 @@ def main():
     print(f"   Privacy: {config['video_privacy']}")
     print()
     
-    if AutomationEngine is None:
-        print("❌ Automation engine unavailable. Install dependencies with: pip install -r requirements.txt")
-        sys.exit(1)
-
     # Initialize automation engine
     automation = AutomationEngine(config)
     
