@@ -29,6 +29,11 @@ def check_dependencies():
         print("❌ Python 3.8 or higher is required")
         print(f"   Current version: {sys.version}")
         return False
+    if sys.version_info >= (3, 14):
+        print("❌ Python 3.14 is not supported")
+        print("   Pillow and lxml do not provide prebuilt wheels for Python 3.14 yet.")
+        print("   Please install Python 3.8-3.13 instead.")
+        return False
     print(f"✓ Python {sys.version_info.major}.{sys.version_info.minor}")
     
     # Check ffmpeg

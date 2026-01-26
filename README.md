@@ -16,7 +16,7 @@ A **100% fully automated** content creation system that generates videos with AI
 
 ### Prerequisites
 
-- Python 3.8 or higher
+- Python 3.8-3.13 (Pillow/lxml wheels are not available for Python 3.14)
 - OpenAI API key
 - Amazon Affiliate account
 - YouTube account with API access

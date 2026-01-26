@@ -11,7 +11,7 @@ Get your automated YouTube content system running in 5 minutes!
 git clone https://github.com/S3OPS/youtube.git
 cd youtube
 
-# Install Python packages
+# Install Python packages (use Python 3.8-3.13)
 pip install -r requirements.txt
 
 # Install ffmpeg (choose your OS)
