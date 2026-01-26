@@ -5,8 +5,84 @@ Run this script to create and upload a video immediately
 
 import os
 import sys
-from dotenv import load_dotenv
-from automation_engine import AutomationEngine
+import subprocess
+import importlib.util
+import shutil
+try:
+    from dotenv import load_dotenv
+except ImportError:
+    load_dotenv = None
+try:
+    from automation_engine import AutomationEngine
+except ModuleNotFoundError:
+    AutomationEngine = None
+
+
+def run_preflight_checks():
+    """Run preflight checks for the full automation workflow."""
+    print("Step 0: Running preflight checks...")
+    errors = []
+
+    if sys.version_info < (3, 8):
+        errors.append(f"Python 3.8+ required (current: {sys.version.split()[0]})")
+
+    required_modules = {
+        'dotenv': 'python-dotenv',
+        'openai': 'openai',
+        'googleapiclient.discovery': 'google-api-python-client',
+        'google.auth_oauthlib': 'google-auth-oauthlib',
+        'google.auth_httplib2': 'google-auth-httplib2',
+        'gtts': 'gtts',
+        'moviepy': 'moviepy',
+        'schedule': 'schedule',
+        'requests': 'requests',
+        'bs4': 'beautifulsoup4',
+        'lxml': 'lxml',
+        'PIL': 'pillow',
+        'pyttsx3': 'pyttsx3'
+    }
+    missing_packages = []
+    for module, package in required_modules.items():
+        try:
+            spec = importlib.util.find_spec(module)
+        except ModuleNotFoundError:
+            spec = None
+        if spec is None:
+            missing_packages.append(package)
+    if missing_packages:
+        errors.append(
+            f"Missing Python packages: {', '.join(missing_packages)} "
+            "(run: pip install -r requirements.txt)"
+        )
+
+    if AutomationEngine is None:
+        errors.append("Automation engine unavailable (install dependencies and retry)")
+
+    if not shutil.which('ffmpeg'):
+        errors.append("ffmpeg is not installed (required for video rendering)")
+    else:
+        try:
+            subprocess.run(['ffmpeg', '-version'], capture_output=True, text=True, check=True)
+        except subprocess.CalledProcessError:
+            errors.append("ffmpeg check failed (ensure ffmpeg runs from your PATH)")
+
+    required_vars = ['OPENAI_API_KEY', 'AMAZON_AFFILIATE_TAG']
+    missing_vars = [var for var in required_vars if not os.getenv(var)]
+    if missing_vars:
+        errors.append(f"Missing required environment variables: {', '.join(missing_vars)}")
+
+    if not os.path.exists('client_secrets.json'):
+        errors.append("client_secrets.json not found (required for YouTube upload)")
+
+    if errors:
+        print("❌ Preflight checks failed:")
+        for error in errors:
+            print(f"   - {error}")
+        print("\nResolve the issues above and try again.")
+        return False
+
+    print("✅ Preflight checks passed.\n")
+    return True
 
 
 def main():
@@ -19,19 +95,12 @@ def main():
     """)
     
     # Load environment variables
-    load_dotenv()
-    
-    # Check for required environment variables
-    required_vars = ['OPENAI_API_KEY', 'AMAZON_AFFILIATE_TAG']
-    missing_vars = [var for var in required_vars if not os.getenv(var)]
-    
-    if missing_vars:
-        print(f"❌ Error: Missing required environment variables:")
-        for var in missing_vars:
-            print(f"   - {var}")
-        print("\nPlease create a .env file based on .env.example")
+    if load_dotenv:
+        load_dotenv()
+
+    if not run_preflight_checks():
         sys.exit(1)
-    
+
     # Initialize configuration
     config = {
         'openai_api_key': os.getenv('OPENAI_API_KEY'),

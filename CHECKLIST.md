@@ -1,202 +1,23 @@
-# Getting Started Checklist
+# Getting Started Checklist (Consolidated)
 
-Use this checklist to ensure you have everything set up correctly.
+This checklist has been consolidated to reduce duplicate setup steps.
 
-## ☑️ Prerequisites
+## ✅ Use These Sources
 
-- [ ] Python 3.8 or higher installed
-- [ ] pip package manager available
-- [ ] ffmpeg installed on your system
-- [ ] Git installed (for cloning)
+1. **Quick setup:** [QUICKSTART.md](QUICKSTART.md)
+2. **Full setup & automation flow:** [README.md](README.md)
+3. **Setup issues:** [TROUBLESHOOTING.md](TROUBLESHOOTING.md)
 
-**Verify:**
-```bash
-python3 --version  # Should be 3.8+
-pip --version
-ffmpeg -version
-git --version
-```
+## ✅ Minimal Verification
 
----
-
-## ☑️ Installation
-
-- [ ] Clone the repository
-  ```bash
-  git clone https://github.com/S3OPS/youtube.git
-  cd youtube
-  ```
-
-- [ ] Install Python dependencies
-  ```bash
-  pip install -r requirements.txt
-  ```
-
-- [ ] Verify all packages installed
-  ```bash
-  python3 -c "import flask, openai, gtts, moviepy; print('✓ All packages installed')"
-  ```
-
----
-
-## ☑️ API Keys & Credentials
-
-### OpenAI API Key
-
-- [ ] Go to https://platform.openai.com/api-keys
-- [ ] Create new secret key
-- [ ] Copy the key (starts with `sk-`)
-- [ ] Save it securely
-
-### Amazon Affiliate Tag
-
-- [ ] Sign up at https://affiliate-program.amazon.com/
-- [ ] Complete account setup
-- [ ] Get your affiliate tag (format: `yourname-20`)
-- [ ] Save it securely
-
-### YouTube API Credentials
-
-- [ ] Go to https://console.cloud.google.com/
-- [ ] Create a new project (or select existing)
-- [ ] Enable "YouTube Data API v3"
-- [ ] Create OAuth 2.0 Client ID credentials
-- [ ] Configure consent screen
-- [ ] Download credentials as JSON
-- [ ] Rename to `client_secrets.json`
-- [ ] Place in project root directory
-
----
-
-## ☑️ Configuration
-
-### Option 1: Setup Wizard (Recommended)
-
-- [ ] Run the setup wizard
+- [ ] Run the setup wizard:
   ```bash
   python setup.py
   ```
-
-- [ ] Follow prompts to enter:
-  - OpenAI API key
-  - Amazon affiliate tag
-  - Content topic
-  - Content frequency
-  - Video privacy
-
-### Option 2: Manual Configuration
-
-- [ ] Copy the example file
-  ```bash
-  cp .env.example .env
-  ```
-
-- [ ] Edit `.env` file with your values:
-  ```env
-  OPENAI_API_KEY=sk-your-actual-key-here
-  AMAZON_AFFILIATE_TAG=youraffid-20
-  CONTENT_TOPIC=technology
-  CONTENT_FREQUENCY=daily
-  VIDEO_PRIVACY=public
-  ```
-
-- [ ] Verify `.env` file exists and has correct values
-  ```bash
-  cat .env
-  ```
-
----
-
-## ☑️ First Test
-
-### Test 1: Check Dependencies
-
-- [ ] Verify ffmpeg
-  ```bash
-  ffmpeg -version
-  ```
-
-- [ ] Verify Python modules
-  ```bash
-  python3 setup.py
-  ```
-
-### Test 2: Test Content Generation (No Upload)
-
-- [ ] Create a test script (optional - requires OpenAI key)
-  ```python
-  python3 -c "
-  from dotenv import load_dotenv
-  import os
-  load_dotenv()
-  from content_generator import ContentGenerator
-  gen = ContentGenerator(os.getenv('OPENAI_API_KEY'), 'technology')
-  script = gen.generate_video_script()
-  print('✓ Content generation working!')
-  print('Script length:', len(script))
-  "
-  ```
-
-### Test 3: Start Web Dashboard
-
-- [ ] Start the Flask server
-  ```bash
-  python app.py
-  ```
-
-- [ ] Open browser to http://localhost:5000
-
-- [ ] Verify dashboard loads
-
-- [ ] Check that stats show zeros
-
-- [ ] Click "Refresh Status" button
-
-### Test 4: Create First Video (Full Test)
-
-**Option A: Using Web Dashboard**
-
-- [ ] Click "Create & Upload Video Now"
-- [ ] Watch activity log for progress
-- [ ] Wait for completion (2-5 minutes)
-- [ ] Check for success message
-- [ ] Verify video appears in "Recent Videos"
-- [ ] Click YouTube link to view
-
-**Option B: Using CLI**
-
-- [ ] Run creation script
+- [ ] Run the full-auto CLI (preflight checks included):
   ```bash
   python create_video.py
   ```
-
-- [ ] Monitor console output
-
-- [ ] Check for success message
-
-- [ ] Note the YouTube URL
-
-- [ ] Verify video file in `generated_videos/`
-
----
-
-## ☑️ Verify Output
-
-- [ ] Generated script file exists in `generated_scripts/`
-
-- [ ] Generated video file exists in `generated_videos/`
-
-- [ ] Video uploaded to YouTube successfully
-
-- [ ] Video has title and description
-
-- [ ] Description contains Amazon affiliate links
-
-- [ ] Affiliate links include your tag
-
-- [ ] Video is playable on YouTube
-
----
 
 ## ☑️ Post-Setup
 

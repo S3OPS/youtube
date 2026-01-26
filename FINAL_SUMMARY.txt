@@ -45,7 +45,7 @@ Documentation (8):
   • API.md                    - Complete API reference
   • ARCHITECTURE.md           - System design docs
   • EXAMPLES.md               - 17 usage examples
-  • CHECKLIST.md              - Setup verification
+  • CHECKLIST.md              - Setup verification (consolidated)
   • TROUBLESHOOTING.md        - Problem solving
   • PROJECT_SUMMARY.md        - Complete overview
 
