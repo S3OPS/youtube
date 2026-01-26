@@ -43,7 +43,11 @@ def run_preflight_checks():
     }
     missing_packages = []
     for module, package in required_modules.items():
-        if importlib.util.find_spec(module) is None:
+        try:
+            spec = importlib.util.find_spec(module)
+        except ModuleNotFoundError:
+            spec = None
+        if spec is None:
             missing_packages.append(package)
     if missing_packages:
         errors.append(
