@@ -30,9 +30,15 @@ def run_preflight_checks():
         'openai': 'openai',
         'googleapiclient': 'google-api-python-client',
         'google_auth_oauthlib': 'google-auth-oauthlib',
+        'google_auth_httplib2': 'google-auth-httplib2',
         'gtts': 'gtts',
         'moviepy': 'moviepy',
-        'schedule': 'schedule'
+        'schedule': 'schedule',
+        'requests': 'requests',
+        'bs4': 'beautifulsoup4',
+        'lxml': 'lxml',
+        'PIL': 'pillow',
+        'pyttsx3': 'pyttsx3'
     }
     missing_packages = [
         package for module, package in required_modules.items()
