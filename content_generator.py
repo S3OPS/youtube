@@ -11,7 +11,6 @@ from functools import lru_cache
 from utils import get_timestamp_string, validate_api_key
 from config import Config
 from cache import SimpleCache
-from urllib3.util.retry import Retry
 import httpx
 
 

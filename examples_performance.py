@@ -66,12 +66,12 @@ def example_connection_pooling():
     """Example: Content generator with connection pooling"""
     print("\n=== Example: Connection Pooling ===")
     
-    # Set mock API key for example
-    os.environ['OPENAI_API_KEY'] = 'sk-test-' + 'x' * 48
+    # Use dedicated test API key for example
+    test_api_key = 'sk-test-' + 'x' * 48
     
     # Create multiple generators - they share the same HTTP client pool
-    gen1 = ContentGenerator(os.environ['OPENAI_API_KEY'], enable_cache=True)
-    gen2 = ContentGenerator(os.environ['OPENAI_API_KEY'], enable_cache=True)
+    gen1 = ContentGenerator(test_api_key, enable_cache=True)
+    gen2 = ContentGenerator(test_api_key, enable_cache=True)
     
     # Both use the same connection pool automatically
     # API calls will reuse connections, reducing latency

@@ -14,17 +14,19 @@ import threading
 class SimpleCache:
     """Simple file-based cache for API responses with thread-safe operations"""
     
-    def __init__(self, cache_dir='.cache', ttl_seconds=3600, max_size_mb=100):
+    def __init__(self, cache_dir='.cache', ttl_seconds=3600, max_size_mb=100, eviction_percentage=25):
         """Initialize cache
         
         Args:
             cache_dir: Directory to store cache files
             ttl_seconds: Time to live for cache entries (default: 1 hour)
             max_size_mb: Maximum cache size in MB (default: 100MB)
+            eviction_percentage: Percentage of old entries to evict when max size reached (default: 25)
         """
         self.cache_dir = cache_dir
         self.ttl_seconds = ttl_seconds
         self.max_size_mb = max_size_mb
+        self.eviction_percentage = min(max(eviction_percentage, 1), 100)
         self._lock = threading.RLock()
         os.makedirs(cache_dir, exist_ok=True, mode=0o700)
     
@@ -173,9 +175,10 @@ class SimpleCache:
                     mtime = os.path.getmtime(file_path)
                     files.append((mtime, file_path))
             
-            # Sort by modification time and remove oldest 25%
+            # Sort by modification time and remove configured percentage
             files.sort()
-            to_remove = files[:len(files) // 4] if files else []
+            to_remove_count = max(1, len(files) * self.eviction_percentage // 100)
+            to_remove = files[:to_remove_count] if files else []
             
             for _, file_path in to_remove:
                 os.remove(file_path)

@@ -71,13 +71,13 @@ def test_connection_pooling():
     """Test connection pooling setup"""
     print("\n=== Testing Connection Pooling ===")
     
-    # Mock API key for testing structure
-    os.environ['OPENAI_API_KEY'] = 'sk-test-' + 'x' * 48
+    # Use dedicated test API key
+    test_api_key = 'sk-test-' + 'x' * 48
     
     from content_generator import ContentGenerator
     
     # Test that HTTP client pool is created
-    gen1 = ContentGenerator(os.environ['OPENAI_API_KEY'])
+    gen1 = ContentGenerator(test_api_key)
     assert hasattr(ContentGenerator, '_get_http_client'), "HTTP client pool method missing"
     print("✓ Connection pooling method exists")
     
@@ -86,7 +86,7 @@ def test_connection_pooling():
     print("✓ OpenAI client initialized with pooling")
     
     # Test shared client
-    gen2 = ContentGenerator(os.environ['OPENAI_API_KEY'])
+    gen2 = ContentGenerator(test_api_key)
     assert ContentGenerator._http_client is not None, "Shared HTTP client not created"
     print("✓ Shared HTTP client pool works")
     
@@ -96,6 +96,9 @@ def test_connection_pooling():
 def test_async_task_queue():
     """Test async task queue setup"""
     print("\n=== Testing Async Task Queue ===")
+    
+    # Set up minimal environment for app import
+    os.environ['OPENAI_API_KEY'] = 'sk-test-' + 'x' * 48
     
     # Import app components
     import app as flask_app
@@ -113,6 +116,10 @@ def test_async_task_queue():
     assert hasattr(flask_app, 'active_tasks'), "Active tasks dict missing"
     assert hasattr(flask_app, 'task_results'), "Task results dict missing"
     print("✓ Task tracking structures exist")
+    
+    # Verify shutdown flag exists
+    assert hasattr(flask_app, 'shutdown_flag'), "Shutdown flag missing"
+    print("✓ Shutdown flag exists")
     
     print("✓ Async task queue tests passed\n")
 
