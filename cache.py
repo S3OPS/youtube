@@ -8,20 +8,26 @@ import hashlib
 import os
 from datetime import datetime, timedelta
 from functools import wraps
+import threading
 
 
 class SimpleCache:
-    """Simple file-based cache for API responses"""
+    """Simple file-based cache for API responses with thread-safe operations"""
     
-    def __init__(self, cache_dir='.cache', ttl_seconds=3600):
+    def __init__(self, cache_dir='.cache', ttl_seconds=3600, max_size_mb=100, eviction_percentage=25):
         """Initialize cache
         
         Args:
             cache_dir: Directory to store cache files
             ttl_seconds: Time to live for cache entries (default: 1 hour)
+            max_size_mb: Maximum cache size in MB (default: 100MB)
+            eviction_percentage: Percentage of old entries to evict when max size reached (default: 25)
         """
         self.cache_dir = cache_dir
         self.ttl_seconds = ttl_seconds
+        self.max_size_mb = max_size_mb
+        self.eviction_percentage = min(max(eviction_percentage, 1), 100)
+        self._lock = threading.RLock()
         os.makedirs(cache_dir, exist_ok=True, mode=0o700)
     
     def _get_cache_key(self, *args, **kwargs):
@@ -45,9 +51,13 @@ class SimpleCache:
         """Get file path for cache key"""
         return os.path.join(self.cache_dir, f"{key}.json")
     
-    def get(self, key):
-        """Get value from cache
+    def get(self, key, ttl_override=None):
+        """Get value from cache with optional TTL override
         
+        Args:
+            key: Cache key
+            ttl_override: Optional TTL in seconds to override default
+            
         Returns:
             Cached value or None if not found or expired
         """
@@ -57,32 +67,45 @@ class SimpleCache:
             return None
         
         try:
-            with open(cache_path, 'r') as f:
-                data = json.load(f)
-            
-            # Check if expired
-            cached_time = datetime.fromisoformat(data['timestamp'])
-            if datetime.now() - cached_time > timedelta(seconds=self.ttl_seconds):
-                # Expired, remove file
-                os.remove(cache_path)
-                return None
-            
-            return data['value']
+            with self._lock:
+                with open(cache_path, 'r') as f:
+                    data = json.load(f)
+                
+                # Check if expired
+                cached_time = datetime.fromisoformat(data['timestamp'])
+                ttl = ttl_override if ttl_override is not None else data.get('ttl', self.ttl_seconds)
+                if datetime.now() - cached_time > timedelta(seconds=ttl):
+                    # Expired, remove file
+                    os.remove(cache_path)
+                    return None
+                
+                return data['value']
         except Exception as e:
             print(f"Error reading cache: {e}")
             return None
     
-    def set(self, key, value):
-        """Set value in cache"""
+    def set(self, key, value, ttl_override=None):
+        """Set value in cache with optional TTL override
+        
+        Args:
+            key: Cache key
+            value: Value to cache
+            ttl_override: Optional TTL in seconds to override default
+        """
         cache_path = self._get_cache_path(key)
         
         try:
-            data = {
-                'timestamp': datetime.now().isoformat(),
-                'value': value
-            }
-            with open(cache_path, 'w') as f:
-                json.dump(data, f)
+            with self._lock:
+                # Check cache size and evict if needed
+                self._evict_if_needed()
+                
+                data = {
+                    'timestamp': datetime.now().isoformat(),
+                    'value': value,
+                    'ttl': ttl_override if ttl_override is not None else self.ttl_seconds
+                }
+                with open(cache_path, 'w') as f:
+                    json.dump(data, f)
             return True
         except Exception as e:
             print(f"Error writing cache: {e}")
@@ -91,14 +114,118 @@ class SimpleCache:
     def clear(self):
         """Clear all cache entries"""
         try:
-            for filename in os.listdir(self.cache_dir):
-                file_path = os.path.join(self.cache_dir, filename)
-                if os.path.isfile(file_path):
-                    os.remove(file_path)
+            with self._lock:
+                for filename in os.listdir(self.cache_dir):
+                    file_path = os.path.join(self.cache_dir, filename)
+                    if os.path.isfile(file_path):
+                        os.remove(file_path)
             return True
         except Exception as e:
             print(f"Error clearing cache: {e}")
             return False
+    
+    def invalidate(self, key):
+        """Invalidate a specific cache entry
+        
+        Args:
+            key: Cache key to invalidate
+            
+        Returns:
+            True if invalidated, False otherwise
+        """
+        cache_path = self._get_cache_path(key)
+        try:
+            with self._lock:
+                if os.path.exists(cache_path):
+                    os.remove(cache_path)
+                    return True
+            return False
+        except Exception as e:
+            print(f"Error invalidating cache: {e}")
+            return False
+    
+    def _get_cache_size_and_files(self):
+        """Get cache size and file list in a single pass
+        
+        Returns:
+            Tuple of (size_mb, files_list) where files_list is [(mtime, path), ...]
+        """
+        total_size = 0
+        files = []
+        try:
+            for filename in os.listdir(self.cache_dir):
+                file_path = os.path.join(self.cache_dir, filename)
+                if os.path.isfile(file_path):
+                    size = os.path.getsize(file_path)
+                    total_size += size
+                    mtime = os.path.getmtime(file_path)
+                    files.append((mtime, file_path))
+        except Exception as e:
+            print(f"Error calculating cache size: {e}")
+        return total_size / (1024 * 1024), files
+    
+    def get_size(self):
+        """Get total cache size in MB
+        
+        Returns:
+            Cache size in megabytes
+        """
+        size_mb, _ = self._get_cache_size_and_files()
+        return size_mb
+    
+    def _evict_if_needed(self):
+        """Evict old entries if cache exceeds max size"""
+        size_mb, files = self._get_cache_size_and_files()
+        if size_mb > self.max_size_mb:
+            self._evict_oldest(files)
+    
+    def _evict_oldest(self, files=None):
+        """Evict oldest cache entries to free up space
+        
+        Args:
+            files: Optional pre-computed file list to avoid re-scanning
+        """
+        try:
+            if files is None:
+                _, files = self._get_cache_size_and_files()
+            
+            # Sort by modification time and remove configured percentage
+            files.sort()
+            to_remove_count = max(1, len(files) * self.eviction_percentage // 100)
+            to_remove = files[:to_remove_count] if files else []
+            
+            for _, file_path in to_remove:
+                os.remove(file_path)
+                
+        except Exception as e:
+            print(f"Error evicting cache: {e}")
+    
+    def cleanup_expired(self):
+        """Remove all expired cache entries
+        
+        Returns:
+            Number of entries removed
+        """
+        removed = 0
+        try:
+            with self._lock:
+                for filename in os.listdir(self.cache_dir):
+                    file_path = os.path.join(self.cache_dir, filename)
+                    if os.path.isfile(file_path):
+                        try:
+                            with open(file_path, 'r') as f:
+                                data = json.load(f)
+                            cached_time = datetime.fromisoformat(data['timestamp'])
+                            ttl = data.get('ttl', self.ttl_seconds)
+                            if datetime.now() - cached_time > timedelta(seconds=ttl):
+                                os.remove(file_path)
+                                removed += 1
+                        except Exception as e:
+                            # Ignore errors on individual cache files but log for diagnostics
+                            print(f"Error processing cache file '{file_path}': {e}")
+        except Exception as e:
+            print(f"Error cleaning up expired cache: {e}")
+        return removed
 
 
 def cached(cache_instance, ttl_seconds=None):

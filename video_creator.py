@@ -5,6 +5,7 @@ Creates videos from scripts using text-to-speech and stock footage
 
 import os
 import tempfile
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from gtts import gTTS
 from moviepy.editor import (
     ImageClip, AudioFileClip, CompositeVideoClip, 
@@ -13,6 +14,14 @@ from moviepy.editor import (
 from PIL import Image, ImageDraw, ImageFont
 import random
 from utils import get_timestamp_string
+
+# Import new infrastructure if available
+try:
+    from core.logging import get_logger
+    from core.file_utils import FileManager
+    _HAS_CORE = True
+except ImportError:
+    _HAS_CORE = False
 
 
 class VideoCreator:
@@ -24,22 +33,36 @@ class VideoCreator:
         [(230, 126, 34), (241, 148, 138)], # Orange gradient
     ]
     
-    def __init__(self, output_dir="generated_videos"):
-        """Initialize the video creator"""
+    def __init__(self, output_dir="generated_videos", max_workers=2):
+        """Initialize the video creator
+        
+        Args:
+            output_dir: Directory for output videos
+            max_workers: Maximum parallel workers for batch processing
+        """
         self.output_dir = output_dir
+        self.max_workers = max_workers
         os.makedirs(output_dir, exist_ok=True)
         # Use secure temp directory
-        self.temp_dir = tempfile.mkdtemp(prefix="youtube_video_", dir=tempfile.gettempdir())
-        os.chmod(self.temp_dir, 0o700)
+        if _HAS_CORE:
+            self.temp_dir = FileManager.create_temp_directory(prefix="youtube_video_")
+            self.logger = get_logger(__name__)
+        else:
+            self.temp_dir = tempfile.mkdtemp(prefix="youtube_video_", dir=tempfile.gettempdir())
+            os.chmod(self.temp_dir, 0o700)
+            self.logger = None
     
     def cleanup(self):
         """Clean up temporary directory"""
-        import shutil
-        if hasattr(self, 'temp_dir') and os.path.exists(self.temp_dir):
-            try:
-                shutil.rmtree(self.temp_dir)
-            except Exception as e:
-                print(f"Warning: Could not remove temp directory {self.temp_dir}: {e}")
+        if _HAS_CORE:
+            FileManager.remove_directory(self.temp_dir)
+        else:
+            import shutil
+            if hasattr(self, 'temp_dir') and os.path.exists(self.temp_dir):
+                try:
+                    shutil.rmtree(self.temp_dir)
+                except Exception as e:
+                    print(f"Warning: Could not remove temp directory {self.temp_dir}: {e}")
     
     def __del__(self):
         """Cleanup on deletion"""
@@ -56,7 +79,11 @@ class VideoCreator:
             tts.save(output_file)
             return output_file
         except Exception as e:
-            print(f"Error creating audio: {e}")
+            msg = f"Error creating audio: {e}"
+            if self.logger:
+                self.logger.error(msg)
+            else:
+                print(msg)
             return None
     
     def create_background_image(self, width=1920, height=1080, color=None):
@@ -86,7 +113,12 @@ class VideoCreator:
         Returns:
             Tuple of (audio_clip, audio_file_path) or (None, None) on error
         """
-        print("Generating audio...")
+        msg = "Generating audio..."
+        if self.logger:
+            self.logger.info(msg)
+        else:
+            print(msg)
+        
         audio_file = self.text_to_speech(script)
         if not audio_file:
             return None, None
@@ -95,7 +127,11 @@ class VideoCreator:
             audio_clip = AudioFileClip(audio_file)
             return audio_clip, audio_file
         except Exception as e:
-            print(f"Error loading audio: {e}")
+            msg = f"Error loading audio: {e}"
+            if self.logger:
+                self.logger.error(msg)
+            else:
+                print(msg)
             return None, None
     
     def _create_video_clip(self, duration, title=None, use_simple_bg=True):
@@ -109,7 +145,11 @@ class VideoCreator:
         Returns:
             Video clip or None on error
         """
-        print("Creating background...")
+        msg = "Creating background..."
+        if self.logger:
+            self.logger.info(msg)
+        else:
+            print(msg)
         
         if use_simple_bg:
             # Simple solid color background
@@ -138,12 +178,16 @@ class VideoCreator:
                 
                 video = CompositeVideoClip([video, title_clip])
             except Exception as e:
-                print(f"Text overlay error: {e}, using background only")
+                msg = f"Text overlay error: {e}, using background only"
+                if self.logger:
+                    self.logger.warning(msg)
+                else:
+                    print(msg)
         
         return video
     
     def _render_video(self, video_clip, output_file):
-        """Render video clip to file
+        """Render video clip to file with optimized settings
         
         Args:
             video_clip: MoviePy video clip
@@ -153,7 +197,12 @@ class VideoCreator:
             True on success, False on error
         """
         try:
-            print(f"Rendering video to {output_file}...")
+            msg = f"Rendering video to {output_file}..."
+            if self.logger:
+                self.logger.info(msg)
+            else:
+                print(msg)
+            
             video_clip.write_videofile(
                 output_file,
                 fps=24,
@@ -161,21 +210,31 @@ class VideoCreator:
                 audio_codec='aac',
                 temp_audiofile=os.path.join(self.temp_dir, f'temp_audio_{get_timestamp_string()}.m4a'),
                 remove_temp=True,
-                logger=None  # Suppress verbose output
+                logger=None,  # Suppress verbose output
+                threads=4,  # Use multiple threads for encoding
+                preset='medium',  # Balance between speed and quality
+                audio_bitrate='128k'
             )
             return True
         except Exception as e:
-            print(f"Error rendering video: {e}")
+            msg = f"Error rendering video: {e}"
+            if self.logger:
+                self.logger.error(msg)
+            else:
+                print(msg)
             return False
     
     def _cleanup_temp_files(self, *file_paths):
         """Clean up temporary files"""
         for file_path in file_paths:
             if file_path and os.path.exists(file_path):
-                try:
-                    os.remove(file_path)
-                except Exception as e:
-                    print(f"Warning: Could not remove temp file {file_path}: {e}")
+                if _HAS_CORE:
+                    FileManager.remove_file(file_path)
+                else:
+                    try:
+                        os.remove(file_path)
+                    except Exception as e:
+                        print(f"Warning: Could not remove temp file {file_path}: {e}")
     
     def create_video(self, script, title, use_simple_bg=True, output_file=None):
         """Create a video from a script (unified method)
@@ -219,11 +278,19 @@ class VideoCreator:
             if not self._render_video(final_video, output_file):
                 return None
             
-            print(f"Video created successfully: {output_file}")
+            msg = f"Video created successfully: {output_file}"
+            if self.logger:
+                self.logger.info(msg)
+            else:
+                print(msg)
             return output_file
             
         except Exception as e:
-            print(f"Error creating video: {e}")
+            msg = f"Error creating video: {e}"
+            if self.logger:
+                self.logger.error(msg, exc_info=True)
+            else:
+                print(msg)
             return None
         finally:
             # Clean up resources
@@ -242,3 +309,57 @@ class VideoCreator:
     def create_simple_video(self, script, title):
         """Create a simple video with solid color background"""
         return self.create_video(script, title, use_simple_bg=True)
+    
+    def create_videos_batch(self, video_specs, max_batch_size=10):
+        """Create multiple videos in parallel (batch processing)
+        
+        Args:
+            video_specs: List of dicts with keys: script, title, use_simple_bg, output_file
+            max_batch_size: Maximum number of videos to process in one batch (default: 10)
+            
+        Returns:
+            List of (video_spec, output_file_or_none) tuples
+        """
+        if not video_specs:
+            raise ValueError("video_specs cannot be empty")
+        if not isinstance(video_specs, list):
+            raise TypeError("video_specs must be a list")
+        for i, spec in enumerate(video_specs):
+            if not isinstance(spec, dict):
+                raise TypeError(f"video_specs[{i}] must be a dictionary")
+            if 'script' not in spec or 'title' not in spec:
+                raise ValueError(f"video_specs[{i}] missing required keys 'script' or 'title'")
+        
+        if len(video_specs) > max_batch_size:
+            raise ValueError(f"Batch size {len(video_specs)} exceeds maximum {max_batch_size}")
+        
+        results = []
+        
+        with ThreadPoolExecutor(max_workers=self.max_workers) as executor:
+            # Submit all tasks
+            future_to_spec = {
+                executor.submit(
+                    self.create_video,
+                    spec['script'],
+                    spec['title'],
+                    spec.get('use_simple_bg', True),
+                    spec.get('output_file')
+                ): spec
+                for spec in video_specs
+            }
+            
+            # Collect results as they complete
+            for future in as_completed(future_to_spec):
+                spec = future_to_spec[future]
+                try:
+                    output_file = future.result()
+                    results.append((spec, output_file))
+                    if output_file:
+                        print(f"Batch: Completed {spec['title']}")
+                    else:
+                        print(f"Batch: Failed {spec['title']}")
+                except Exception as e:
+                    print(f"Batch: Error processing {spec['title']}: {e}")
+                    results.append((spec, None))
+        
+        return results

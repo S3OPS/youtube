@@ -14,11 +14,26 @@ from video_creator import VideoCreator
 from youtube_uploader import YouTubeUploader
 from utils import load_json_file, save_json_file
 
+# Import new services if available
+try:
+    from core.logging import get_logger
+    from core.exceptions import ContentGenerationError, VideoCreationError
+    from services.history_service import HistoryService
+    _HAS_SERVICES = True
+except ImportError:
+    _HAS_SERVICES = False
+
 
 class AutomationEngine:
     def __init__(self, config):
         """Initialize the automation engine with configuration"""
         self.config = config
+        
+        # Initialize logger if available
+        if _HAS_SERVICES:
+            self.logger = get_logger(__name__)
+        else:
+            self.logger = None
         
         # Initialize components
         self.content_gen = ContentGenerator(
@@ -38,18 +53,27 @@ class AutomationEngine:
             client_secrets_file=config.get('youtube_client_secrets', 'client_secrets.json')
         )
         
-        self.history = []
-        self.history_file = 'automation_history.json'
-        self._load_history()
+        # Use history service if available, otherwise maintain backward compatibility
+        if _HAS_SERVICES:
+            self.history_service = HistoryService('automation_history.json', config)
+            self.history = self.history_service.history
+        else:
+            self.history = []
+            self.history_file = 'automation_history.json'
+            self._load_history()
     
     def _load_history(self):
         """Load automation history from file"""
+        if _HAS_SERVICES:
+            return  # Handled by history service
         self.history = load_json_file(self.history_file, default=[])
         if not self.history:
             print(f"No existing history found or failed to load from {self.history_file}")
     
     def _save_history(self):
         """Save automation history to file"""
+        if _HAS_SERVICES:
+            return  # Handled by history service
         save_json_file(self.history_file, self.history)
     
     def _generate_content(self, entry):
@@ -62,11 +86,24 @@ class AutomationEngine:
             Tuple of (script, title, description_with_links, keywords) or (None, ...) on error
         """
         # Step 1: Generate script
-        print("Step 1: Generating video script...")
+        msg = "Step 1: Generating video script..."
+        if self.logger:
+            self.logger.info(msg)
+        else:
+            print(msg)
+        
         script = self.content_gen.generate_video_script()
         if not script:
-            raise Exception("Failed to generate script")
-        print(f"Script generated ({len(script)} characters)")
+            error_msg = "Failed to generate script"
+            if _HAS_SERVICES:
+                raise ContentGenerationError(error_msg)
+            raise Exception(error_msg)
+        
+        msg = f"Script generated ({len(script)} characters)"
+        if self.logger:
+            self.logger.info(msg)
+        else:
+            print(msg)
         entry['script_length'] = len(script)
         
         # Save script
@@ -104,11 +141,24 @@ class AutomationEngine:
         Returns:
             Path to created video file or None on error
         """
-        print("\nStep 4: Creating video...")
+        msg = "\nStep 4: Creating video..."
+        if self.logger:
+            self.logger.info(msg)
+        else:
+            print(msg)
+        
         video_file = self.video_creator.create_simple_video(script, title)
         if not video_file:
-            raise Exception("Video creation failed - video_creator.create_simple_video returned None")
-        print(f"Video created: {video_file}")
+            error_msg = "Video creation failed - video_creator.create_simple_video returned None"
+            if _HAS_SERVICES:
+                raise VideoCreationError(error_msg)
+            raise Exception(error_msg)
+        
+        msg = f"Video created: {video_file}"
+        if self.logger:
+            self.logger.info(msg)
+        else:
+            print(msg)
         entry['video_file'] = video_file
         return video_file
     
@@ -149,8 +199,12 @@ class AutomationEngine:
         Args:
             entry: Dictionary containing automation run details
         """
-        self.history.append(entry)
-        self._save_history()
+        if _HAS_SERVICES:
+            self.history_service.add_entry(entry)
+            self.history = self.history_service.history
+        else:
+            self.history.append(entry)
+            self._save_history()
     
     def create_and_upload_video(self):
         """Complete workflow: generate content, create video, upload to YouTube"""

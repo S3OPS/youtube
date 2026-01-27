@@ -11,17 +11,92 @@ from functools import lru_cache
 from utils import get_timestamp_string, validate_api_key
 from config import Config
 from cache import SimpleCache
+import httpx
+
+# Import new infrastructure if available
+try:
+    from core.logging import get_logger
+    _HAS_CORE = True
+except ImportError:
+    _HAS_CORE = False
 
 
 class ContentGenerator:
-    def __init__(self, api_key, topic="technology", model=None, enable_cache=True):
-        """Initialize the content generator with OpenAI API key"""
+    # Shared HTTP client pool for all instances
+    _http_client = None
+    _client_lock = None
+    
+    @classmethod
+    def _get_http_client(cls, timeout=60.0):
+        """Get or create shared HTTP client with connection pooling
+        
+        Args:
+            timeout: Timeout for HTTP requests in seconds
+            
+        Returns:
+            Shared httpx.Client instance
+        """
+        if cls._http_client is None:
+            if cls._client_lock is None:
+                import threading
+                cls._client_lock = threading.Lock()
+            
+            with cls._client_lock:
+                if cls._http_client is None:
+                    # Configure connection pooling
+                    limits = httpx.Limits(
+                        max_keepalive_connections=10,
+                        max_connections=20,
+                        keepalive_expiry=30
+                    )
+                    cls._http_client = httpx.Client(
+                        limits=limits,
+                        timeout=timeout
+                    )
+        return cls._http_client
+    
+    @classmethod
+    def close_http_client(cls):
+        """Close the shared HTTP client to release resources
+        
+        Call this when shutting down the application or in cleanup.
+        For long-running applications, the client can remain open.
+        """
+        if cls._client_lock is None:
+            import threading
+            cls._client_lock = threading.Lock()
+        
+        with cls._client_lock:
+            if cls._http_client is not None:
+                cls._http_client.close()
+                cls._http_client = None
+    
+    def __init__(self, api_key, topic="technology", model=None, enable_cache=True, api_timeout=60.0):
+        """Initialize the content generator with OpenAI API key
+        
+        Args:
+            api_key: OpenAI API key
+            topic: Content topic
+            model: OpenAI model to use
+            enable_cache: Enable caching of API responses
+            api_timeout: Timeout for API calls in seconds (default: 60)
+        """
         self.api_key = validate_api_key(api_key, "OpenAI API key")
-        self.client = openai.OpenAI(api_key=self.api_key)
+        
+        # Use shared HTTP client with connection pooling
+        http_client = self._get_http_client(api_timeout)
+        self.client = openai.OpenAI(api_key=self.api_key, http_client=http_client)
+        
         self.topic = topic
         self.model = model or Config.DEFAULT_MODEL
         # Initialize cache (1 hour TTL for API responses)
-        self.cache = SimpleCache(cache_dir='.cache/content_gen', ttl_seconds=3600) if enable_cache else None
+        self.cache = SimpleCache(cache_dir='.cache/content_gen', ttl_seconds=3600, max_size_mb=50) if enable_cache else None
+        
+        # Initialize logger if available
+        if _HAS_CORE:
+            self.logger = get_logger(__name__)
+        else:
+            self.logger = None
         
     def _call_openai_api(self, system_prompt, user_prompt, max_tokens, temperature=0.7):
         """Centralized OpenAI API call with error handling and caching
@@ -42,7 +117,11 @@ class ContentGenerator:
             )
             cached_response = self.cache.get(cache_key)
             if cached_response:
-                print("Using cached API response")
+                msg = "Using cached API response"
+                if self.logger:
+                    self.logger.debug(msg)
+                else:
+                    print(msg)
                 return cached_response
         
         try:
@@ -63,10 +142,18 @@ class ContentGenerator:
             
             return result
         except openai.APIError as e:
-            print(f"OpenAI API error: {e}")
+            msg = f"OpenAI API error: {e}"
+            if self.logger:
+                self.logger.error(msg)
+            else:
+                print(msg)
             return None
         except Exception as e:
-            print(f"Error calling OpenAI API: {e}")
+            msg = f"Error calling OpenAI API: {e}"
+            if self.logger:
+                self.logger.error(msg)
+            else:
+                print(msg)
             return None
     
     def generate_video_script(self, topic=None):
@@ -124,7 +211,11 @@ class ContentGenerator:
             result = json.loads(result_str)
             return result.get('title', 'Amazing Video'), result.get('description', script[:500])
         except json.JSONDecodeError as e:
-            print(f"Error parsing JSON response: {e}")
+            msg = f"Error parsing JSON response: {e}"
+            if self.logger:
+                self.logger.error(msg)
+            else:
+                print(msg)
             return "Amazing Content", script[:500] if script else "Check out this video!"
     
     def generate_product_keywords(self, script):
@@ -151,7 +242,11 @@ class ContentGenerator:
             keywords = keywords_str.strip().split('\n')
             return [k.strip().strip('-').strip('•').strip() for k in keywords if k.strip()][:5]
         except Exception as e:
-            print(f"Error parsing keywords: {e}")
+            msg = f"Error parsing keywords: {e}"
+            if self.logger:
+                self.logger.error(msg)
+            else:
+                print(msg)
             return ["tech gadgets", "electronics", "accessories"]
     
     def _get_fallback_script(self):
