@@ -45,6 +45,8 @@ class AutomationEngine:
     def _load_history(self):
         """Load automation history from file"""
         self.history = load_json_file(self.history_file, default=[])
+        if not self.history:
+            print(f"No existing history found or failed to load from {self.history_file}")
     
     def _save_history(self):
         """Save automation history to file"""

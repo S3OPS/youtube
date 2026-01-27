@@ -37,7 +37,7 @@ class ContentGenerator:
         """
         # Check cache if enabled
         if self.cache:
-            cache_key = self.cache._get_cache_key(
+            cache_key = self.cache.get_cache_key(
                 self.model, system_prompt, user_prompt, max_tokens, temperature
             )
             cached_response = self.cache.get(cache_key)

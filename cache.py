@@ -25,9 +25,21 @@ class SimpleCache:
         os.makedirs(cache_dir, exist_ok=True, mode=0o700)
     
     def _get_cache_key(self, *args, **kwargs):
-        """Generate cache key from arguments"""
+        """Generate cache key from arguments (internal implementation)"""
         key_data = json.dumps({'args': args, 'kwargs': kwargs}, sort_keys=True)
         return hashlib.md5(key_data.encode()).hexdigest()
+    
+    def get_cache_key(self, *args, **kwargs):
+        """Public method to generate cache key from arguments
+        
+        Args:
+            *args: Positional arguments to include in key
+            **kwargs: Keyword arguments to include in key
+            
+        Returns:
+            MD5 hash of the arguments as cache key
+        """
+        return self._get_cache_key(*args, **kwargs)
     
     def _get_cache_path(self, key):
         """Get file path for cache key"""

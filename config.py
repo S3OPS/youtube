@@ -49,10 +49,23 @@ class Config:
         if self.config.get('openai_api_key'):
             try:
                 validate_api_key(self.config['openai_api_key'], "OpenAI API key")
-            except ValueError:
+            except ValueError as e:
                 # Don't fail on missing API key during initialization
                 # It will fail later when actually needed
-                pass
+                print(f"Warning: Configuration validation failed: {e}")
+                print("The system will not be able to generate content without a valid API key")
+    
+    def is_valid_for_content_generation(self):
+        """Check if configuration is valid for content generation
+        
+        Returns:
+            Tuple of (is_valid: bool, error_message: str or None)
+        """
+        try:
+            validate_api_key(self.config.get('openai_api_key'), "OpenAI API key")
+            return True, None
+        except ValueError as e:
+            return False, str(e)
     
     def get(self, key, default=None):
         """Get configuration value"""

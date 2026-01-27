@@ -32,6 +32,19 @@ class VideoCreator:
         self.temp_dir = tempfile.mkdtemp(prefix="youtube_video_", dir=tempfile.gettempdir())
         os.chmod(self.temp_dir, 0o700)
     
+    def cleanup(self):
+        """Clean up temporary directory"""
+        import shutil
+        if hasattr(self, 'temp_dir') and os.path.exists(self.temp_dir):
+            try:
+                shutil.rmtree(self.temp_dir)
+            except Exception as e:
+                print(f"Warning: Could not remove temp directory {self.temp_dir}: {e}")
+    
+    def __del__(self):
+        """Cleanup on deletion"""
+        self.cleanup()
+    
     def text_to_speech(self, text, output_file=None):
         """Convert text to speech using gTTS"""
         if output_file is None:
@@ -180,6 +193,7 @@ class VideoCreator:
             timestamp = get_timestamp_string()
             output_file = f"{self.output_dir}/video_{timestamp}.mp4"
         
+        # Initialize all resources to None for proper cleanup
         audio_clip = None
         video_clip = None
         audio_file = None
