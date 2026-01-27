@@ -81,7 +81,8 @@ install_ffmpeg() {
     return
   fi
 
-  echo "⚠️  ffmpeg not found. Install it manually from https://ffmpeg.org/download.html"
+  echo "❌ ffmpeg not found. Install it manually from https://ffmpeg.org/download.html"
+  exit 1
 }
 
 setup_virtualenv() {
@@ -160,5 +161,7 @@ install_python_312
 install_ffmpeg
 setup_virtualenv
 run_setup_wizard
-view_setup_docs
+if [[ "${SHOW_DOCS:-1}" == "1" ]]; then
+  view_setup_docs
+fi
 final_message

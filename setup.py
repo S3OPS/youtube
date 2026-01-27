@@ -63,7 +63,7 @@ def check_dependencies():
     missing_packages = []
     for module, package in required_packages.items():
         try:
-            __import__(module.replace('-', '_'))
+            __import__(module.replace('_', '.'))
             print(f"✓ {package}")
         except ImportError:
             missing_packages.append(package)
