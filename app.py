@@ -44,8 +44,8 @@ if _HAS_SERVICES:
     task_service.set_executor(task_executor)
     task_service.start()
     
-    # Compatibility: expose task_service methods with old names
-    task_queue = None
+    # Compatibility: expose task_service methods and queue
+    task_queue = task_service.task_queue
     active_tasks = task_service.active_tasks
     task_results = task_service.task_results
     task_lock = task_service.task_lock

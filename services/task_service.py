@@ -146,6 +146,34 @@ class TaskService(BaseService):
                 'queue_size': self.task_queue.qsize()
             }
     
+    def cleanup_old_tasks(self, max_age_hours=24):
+        """Remove old completed/failed tasks to prevent memory leak
+        
+        Args:
+            max_age_hours: Maximum age in hours for keeping completed tasks (default: 24)
+            
+        Returns:
+            Number of tasks removed
+        """
+        with self.task_lock:
+            now = datetime.now()
+            to_remove = []
+            for task_id, task_info in self.active_tasks.items():
+                if 'completed_at' in task_info:
+                    completed_time = datetime.fromisoformat(task_info['completed_at'])
+                    if (now - completed_time).total_seconds() > max_age_hours * 3600:
+                        to_remove.append(task_id)
+            
+            for task_id in to_remove:
+                del self.active_tasks[task_id]
+                if task_id in self.task_results:
+                    del self.task_results[task_id]
+            
+            if to_remove:
+                logger.info(f"Cleaned up {len(to_remove)} old tasks")
+            
+            return len(to_remove)
+    
     def _update_task_status(self, task_id, status, **extra_fields):
         """Update task status
         

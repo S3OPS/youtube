@@ -24,6 +24,7 @@ def example_cache_with_custom_ttl():
     
     # Retrieve with TTL override
     script = cache.get('script_v1', ttl_override=3600)
+    print(f"Retrieved script from cache: {script!r}")
     
     print("✓ Custom TTL example completed")
 
@@ -48,15 +49,23 @@ def example_batch_video_creation():
         }
     ]
     
-    # Process all videos in parallel
-    # results = creator.create_videos_batch(video_specs)
+    print(f"Defined {len(video_specs)} video specs for batch processing")
     
-    # Check results
-    # for spec, output_file in results:
-    #     if output_file:
-    #         print(f"✓ Created: {output_file}")
-    #     else:
-    #         print(f"✗ Failed: {spec['title']}")
+    # Example usage (commented out to avoid actual video creation):
+    batch_processing_example = """
+    Example usage:
+        # Process all videos in parallel
+        results = creator.create_videos_batch(video_specs)
+
+        # Check results
+        for spec, output_file in results:
+            if output_file:
+                print(f"✓ Created: {output_file}")
+            else:
+                print(f"✗ Failed: {spec['title']}")
+    """
+    
+    print(batch_processing_example)
     
     print("✓ Batch processing example shown (commented out to avoid actual video creation)")
     creator.cleanup()
@@ -75,6 +84,10 @@ def example_connection_pooling():
     
     # Both use the same connection pool automatically
     # API calls will reuse connections, reducing latency
+    
+    # Ensure generators are used (prevents unused variable warnings)
+    assert gen1.client is not None, "Generator 1 initialized"
+    assert gen2.client is not None, "Generator 2 initialized"
     
     print("✓ Connection pooling is automatic and shared across instances")
 

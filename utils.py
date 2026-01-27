@@ -61,8 +61,10 @@ def save_json_file(filepath, data):
     
     # Fallback implementation
     try:
-        # Ensure directory exists
-        os.makedirs(os.path.dirname(filepath), exist_ok=True)
+        # Ensure directory exists, if a directory component is present
+        dir_path = os.path.dirname(filepath)
+        if dir_path:
+            os.makedirs(dir_path, exist_ok=True)
         with open(filepath, 'w') as f:
             json.dump(data, f, indent=2)
         return True

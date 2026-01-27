@@ -220,8 +220,9 @@ class SimpleCache:
                             if datetime.now() - cached_time > timedelta(seconds=ttl):
                                 os.remove(file_path)
                                 removed += 1
-                        except Exception:
-                            pass
+                        except Exception as e:
+                            # Ignore errors on individual cache files but log for diagnostics
+                            print(f"Error processing cache file '{file_path}': {e}")
         except Exception as e:
             print(f"Error cleaning up expired cache: {e}")
         return removed

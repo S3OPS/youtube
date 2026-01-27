@@ -9,7 +9,7 @@ import tempfile
 import shutil
 from pathlib import Path
 from .logging import get_logger
-from .error_handler import handle_errors, safe_execute
+from .error_handler import handle_errors
 
 
 logger = get_logger(__name__)
@@ -46,7 +46,9 @@ class FileManager:
         Returns:
             True on success, False on error
         """
-        os.makedirs(os.path.dirname(filepath), exist_ok=True)
+        dir_path = os.path.dirname(filepath)
+        if dir_path:
+            os.makedirs(dir_path, exist_ok=True)
         with open(filepath, 'w', encoding=encoding) as f:
             f.write(content)
         return True
@@ -82,7 +84,9 @@ class FileManager:
         Returns:
             True on success, False on error
         """
-        os.makedirs(os.path.dirname(filepath), exist_ok=True)
+        dir_path = os.path.dirname(filepath)
+        if dir_path:
+            os.makedirs(dir_path, exist_ok=True)
         with open(filepath, 'w', encoding='utf-8') as f:
             json.dump(data, f, indent=indent)
         return True
@@ -156,10 +160,10 @@ class FileManager:
             dir_name: Subdirectory name
             
         Returns:
-            Path to secure directory
+            String path to secure directory
         """
         secure_dir = os.path.expanduser(f"~/.youtube_automation/{dir_name}")
-        return FileManager.ensure_directory(secure_dir, mode=0o700)
+        return str(FileManager.ensure_directory(secure_dir, mode=0o700))
 
 
 class TempFileContext:

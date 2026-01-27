@@ -17,7 +17,7 @@ from utils import load_json_file, save_json_file
 # Import new services if available
 try:
     from core.logging import get_logger
-    from core.exceptions import ContentGenerationError, VideoCreationError, UploadError
+    from core.exceptions import ContentGenerationError, VideoCreationError
     from services.history_service import HistoryService
     _HAS_SERVICES = True
 except ImportError:

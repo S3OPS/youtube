@@ -18,7 +18,6 @@ from utils import get_timestamp_string
 # Import new infrastructure if available
 try:
     from core.logging import get_logger
-    from core.exceptions import VideoCreationError
     from core.file_utils import FileManager
     _HAS_CORE = True
 except ImportError:
@@ -321,6 +320,16 @@ class VideoCreator:
         Returns:
             List of (video_spec, output_file_or_none) tuples
         """
+        if not video_specs:
+            raise ValueError("video_specs cannot be empty")
+        if not isinstance(video_specs, list):
+            raise TypeError("video_specs must be a list")
+        for i, spec in enumerate(video_specs):
+            if not isinstance(spec, dict):
+                raise TypeError(f"video_specs[{i}] must be a dictionary")
+            if 'script' not in spec or 'title' not in spec:
+                raise ValueError(f"video_specs[{i}] missing required keys 'script' or 'title'")
+        
         if len(video_specs) > max_batch_size:
             raise ValueError(f"Batch size {len(video_specs)} exceeds maximum {max_batch_size}")
         

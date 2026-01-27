@@ -16,8 +16,6 @@ import httpx
 # Import new infrastructure if available
 try:
     from core.logging import get_logger
-    from core.exceptions import ContentGenerationError
-    from core.base import BaseAPIClient
     _HAS_CORE = True
 except ImportError:
     _HAS_CORE = False
@@ -56,6 +54,22 @@ class ContentGenerator:
                         timeout=timeout
                     )
         return cls._http_client
+    
+    @classmethod
+    def close_http_client(cls):
+        """Close the shared HTTP client to release resources
+        
+        Call this when shutting down the application or in cleanup.
+        For long-running applications, the client can remain open.
+        """
+        if cls._client_lock is None:
+            import threading
+            cls._client_lock = threading.Lock()
+        
+        with cls._client_lock:
+            if cls._http_client is not None:
+                cls._http_client.close()
+                cls._http_client = None
     
     def __init__(self, api_key, topic="technology", model=None, enable_cache=True, api_timeout=60.0):
         """Initialize the content generator with OpenAI API key

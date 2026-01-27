@@ -15,8 +15,6 @@ from utils import get_secure_directory
 # Import new infrastructure if available
 try:
     from core.logging import get_logger
-    from core.exceptions import AuthenticationError, UploadError
-    from core.base import BaseAPIClient
     from core.file_utils import FileManager
     _HAS_CORE = True
 except ImportError:

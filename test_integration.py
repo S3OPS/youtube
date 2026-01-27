@@ -6,7 +6,6 @@ Tests the complete flow of task creation, tracking, and retrieval
 
 import os
 import sys
-import time
 import json
 
 # Setup environment

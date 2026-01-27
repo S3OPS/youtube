@@ -5,7 +5,6 @@ Centralized error handling utilities for consistent error management
 
 from functools import wraps
 from .logging import get_logger
-from .exceptions import YouTubeAutomationError
 
 
 logger = get_logger(__name__)

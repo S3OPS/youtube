@@ -5,7 +5,6 @@ Simple performance test for the optimization features
 
 import sys
 import os
-from datetime import datetime
 
 def test_cache_improvements():
     """Test enhanced cache functionality"""
@@ -88,6 +87,8 @@ def test_connection_pooling():
     # Test shared client
     gen2 = ContentGenerator(test_api_key)
     assert ContentGenerator._http_client is not None, "Shared HTTP client not created"
+    assert gen2.client is not None, "Shared HTTP client not initialized for second generator"
+    assert gen2.client is gen1.client, "HTTP client is not shared between generators"
     print("✓ Shared HTTP client pool works")
     
     print("✓ Connection pooling tests passed\n")
