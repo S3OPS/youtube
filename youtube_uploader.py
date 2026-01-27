@@ -12,6 +12,16 @@ from googleapiclient.http import MediaFileUpload
 from googleapiclient.errors import HttpError
 from utils import get_secure_directory
 
+# Import new infrastructure if available
+try:
+    from core.logging import get_logger
+    from core.exceptions import AuthenticationError, UploadError
+    from core.base import BaseAPIClient
+    from core.file_utils import FileManager
+    _HAS_CORE = True
+except ImportError:
+    _HAS_CORE = False
+
 
 class YouTubeUploader:
     # Scopes required for YouTube upload
@@ -24,7 +34,12 @@ class YouTubeUploader:
         self.youtube = None
         self.credentials = None
         # Store credentials in secure user directory
-        self.creds_dir = get_secure_directory('credentials')
+        if _HAS_CORE:
+            self.creds_dir = FileManager.get_secure_user_directory('credentials')
+            self.logger = get_logger(__name__)
+        else:
+            self.creds_dir = get_secure_directory('credentials')
+            self.logger = None
         self.token_file = os.path.join(self.creds_dir, 'token.pickle')
     
     def _load_saved_credentials(self):
@@ -34,7 +49,11 @@ class YouTubeUploader:
                 with open(self.token_file, 'rb') as token:
                     return pickle.load(token)
             except Exception as e:
-                print(f"Error loading saved credentials: {e}")
+                msg = f"Error loading saved credentials: {e}"
+                if self.logger:
+                    self.logger.error(msg)
+                else:
+                    print(msg)
         return None
     
     def _save_credentials(self, credentials):
@@ -44,7 +63,11 @@ class YouTubeUploader:
                 pickle.dump(credentials, token)
             return True
         except Exception as e:
-            print(f"Error saving credentials: {e}")
+            msg = f"Error saving credentials: {e}"
+            if self.logger:
+                self.logger.error(msg)
+            else:
+                print(msg)
             return False
     
     def _refresh_credentials(self, credentials):
@@ -53,14 +76,23 @@ class YouTubeUploader:
             credentials.refresh(Request())
             return True
         except Exception as e:
-            print(f"Error refreshing credentials: {e}")
+            msg = f"Error refreshing credentials: {e}"
+            if self.logger:
+                self.logger.error(msg)
+            else:
+                print(msg)
             return False
     
     def _create_new_credentials(self):
         """Create new credentials via OAuth flow"""
         if not os.path.exists(self.client_secrets_file):
-            print(f"Error: {self.client_secrets_file} not found!")
-            print("Please download OAuth 2.0 credentials from Google Cloud Console")
+            msg = f"Error: {self.client_secrets_file} not found!"
+            if self.logger:
+                self.logger.error(msg)
+                self.logger.error("Please download OAuth 2.0 credentials from Google Cloud Console")
+            else:
+                print(msg)
+                print("Please download OAuth 2.0 credentials from Google Cloud Console")
             return None
         
         try:
@@ -68,7 +100,11 @@ class YouTubeUploader:
                 self.client_secrets_file, self.SCOPES)
             return flow.run_local_server(port=0)
         except Exception as e:
-            print(f"Error creating new credentials: {e}")
+            msg = f"Error creating new credentials: {e}"
+            if self.logger:
+                self.logger.error(msg)
+            else:
+                print(msg)
             return None
     
     def authenticate(self):
@@ -95,7 +131,11 @@ class YouTubeUploader:
             self.youtube = build('youtube', 'v3', credentials=self.credentials)
             return True
         except Exception as e:
-            print(f"Error building YouTube service: {e}")
+            msg = f"Error building YouTube service: {e}"
+            if self.logger:
+                self.logger.error(msg)
+            else:
+                print(msg)
             return False
     
     def upload_video(self, video_file, title, description, category_id='22', 
@@ -146,7 +186,12 @@ class YouTubeUploader:
         
         try:
             # Execute the upload
-            print(f"Uploading video: {title}")
+            msg = f"Uploading video: {title}"
+            if self.logger:
+                self.logger.info(msg)
+            else:
+                print(msg)
+            
             request = self.youtube.videos().insert(
                 part=','.join(body.keys()),
                 body=body,
@@ -157,19 +202,37 @@ class YouTubeUploader:
             while response is None:
                 status, response = request.next_chunk()
                 if status:
-                    print(f"Upload progress: {int(status.progress() * 100)}%")
+                    progress_msg = f"Upload progress: {int(status.progress() * 100)}%"
+                    if self.logger:
+                        self.logger.info(progress_msg)
+                    else:
+                        print(progress_msg)
             
             video_id = response['id']
-            print(f"Video uploaded successfully! Video ID: {video_id}")
-            print(f"Video URL: https://www.youtube.com/watch?v={video_id}")
+            success_msg = f"Video uploaded successfully! Video ID: {video_id}"
+            url_msg = f"Video URL: https://www.youtube.com/watch?v={video_id}"
+            if self.logger:
+                self.logger.info(success_msg)
+                self.logger.info(url_msg)
+            else:
+                print(success_msg)
+                print(url_msg)
             
             return video_id
             
         except HttpError as e:
-            print(f"HTTP error uploading video: {e}")
+            msg = f"HTTP error uploading video: {e}"
+            if self.logger:
+                self.logger.error(msg)
+            else:
+                print(msg)
             return None
         except Exception as e:
-            print(f"Error uploading video: {e}")
+            msg = f"Error uploading video: {e}"
+            if self.logger:
+                self.logger.error(msg)
+            else:
+                print(msg)
             return None
     
     def update_video_description(self, video_id, new_description):
@@ -186,7 +249,11 @@ class YouTubeUploader:
             ).execute()
             
             if not video_response['items']:
-                print(f"Video {video_id} not found")
+                msg = f"Video {video_id} not found"
+                if self.logger:
+                    self.logger.error(msg)
+                else:
+                    print(msg)
                 return False
             
             # Update the description
@@ -202,12 +269,24 @@ class YouTubeUploader:
                 }
             ).execute()
             
-            print(f"Video description updated successfully")
+            msg = "Video description updated successfully"
+            if self.logger:
+                self.logger.info(msg)
+            else:
+                print(msg)
             return True
             
         except HttpError as e:
-            print(f"HTTP error updating video: {e}")
+            msg = f"HTTP error updating video: {e}"
+            if self.logger:
+                self.logger.error(msg)
+            else:
+                print(msg)
             return False
         except Exception as e:
-            print(f"Error updating video: {e}")
+            msg = f"Error updating video: {e}"
+            if self.logger:
+                self.logger.error(msg)
+            else:
+                print(msg)
             return False

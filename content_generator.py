@@ -13,6 +13,15 @@ from config import Config
 from cache import SimpleCache
 import httpx
 
+# Import new infrastructure if available
+try:
+    from core.logging import get_logger
+    from core.exceptions import ContentGenerationError
+    from core.base import BaseAPIClient
+    _HAS_CORE = True
+except ImportError:
+    _HAS_CORE = False
+
 
 class ContentGenerator:
     # Shared HTTP client pool for all instances
@@ -69,6 +78,12 @@ class ContentGenerator:
         # Initialize cache (1 hour TTL for API responses)
         self.cache = SimpleCache(cache_dir='.cache/content_gen', ttl_seconds=3600, max_size_mb=50) if enable_cache else None
         
+        # Initialize logger if available
+        if _HAS_CORE:
+            self.logger = get_logger(__name__)
+        else:
+            self.logger = None
+        
     def _call_openai_api(self, system_prompt, user_prompt, max_tokens, temperature=0.7):
         """Centralized OpenAI API call with error handling and caching
         
@@ -88,7 +103,11 @@ class ContentGenerator:
             )
             cached_response = self.cache.get(cache_key)
             if cached_response:
-                print("Using cached API response")
+                msg = "Using cached API response"
+                if self.logger:
+                    self.logger.debug(msg)
+                else:
+                    print(msg)
                 return cached_response
         
         try:
@@ -109,10 +128,18 @@ class ContentGenerator:
             
             return result
         except openai.APIError as e:
-            print(f"OpenAI API error: {e}")
+            msg = f"OpenAI API error: {e}"
+            if self.logger:
+                self.logger.error(msg)
+            else:
+                print(msg)
             return None
         except Exception as e:
-            print(f"Error calling OpenAI API: {e}")
+            msg = f"Error calling OpenAI API: {e}"
+            if self.logger:
+                self.logger.error(msg)
+            else:
+                print(msg)
             return None
     
     def generate_video_script(self, topic=None):
@@ -170,7 +197,11 @@ class ContentGenerator:
             result = json.loads(result_str)
             return result.get('title', 'Amazing Video'), result.get('description', script[:500])
         except json.JSONDecodeError as e:
-            print(f"Error parsing JSON response: {e}")
+            msg = f"Error parsing JSON response: {e}"
+            if self.logger:
+                self.logger.error(msg)
+            else:
+                print(msg)
             return "Amazing Content", script[:500] if script else "Check out this video!"
     
     def generate_product_keywords(self, script):
@@ -197,7 +228,11 @@ class ContentGenerator:
             keywords = keywords_str.strip().split('\n')
             return [k.strip().strip('-').strip('•').strip() for k in keywords if k.strip()][:5]
         except Exception as e:
-            print(f"Error parsing keywords: {e}")
+            msg = f"Error parsing keywords: {e}"
+            if self.logger:
+                self.logger.error(msg)
+            else:
+                print(msg)
             return ["tech gadgets", "electronics", "accessories"]
     
     def _get_fallback_script(self):
