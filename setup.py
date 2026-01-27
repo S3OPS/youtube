@@ -62,12 +62,13 @@ def check_dependencies():
     
     missing_packages = []
     for module, package in required_packages:
+        display_name = package or module
         try:
             __import__(module)
-            print(f"✓ {package or module}")
+            print(f"✓ {display_name}")
         except ImportError:
-            missing_packages.append(package or module)
-            print(f"❌ {package or module}")
+            missing_packages.append(display_name)
+            print(f"❌ {display_name}")
     
     if missing_packages:
         print(f"\n⚠️  Missing packages. Run: pip install -r requirements.txt")
