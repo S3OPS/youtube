@@ -11,17 +11,49 @@ from functools import lru_cache
 from utils import get_timestamp_string, validate_api_key
 from config import Config
 from cache import SimpleCache
+from urllib3.util.retry import Retry
+import httpx
 
 
 class ContentGenerator:
+    # Shared HTTP client pool for all instances
+    _http_client = None
+    _client_lock = None
+    
+    @classmethod
+    def _get_http_client(cls):
+        """Get or create shared HTTP client with connection pooling"""
+        if cls._http_client is None:
+            if cls._client_lock is None:
+                import threading
+                cls._client_lock = threading.Lock()
+            
+            with cls._client_lock:
+                if cls._http_client is None:
+                    # Configure connection pooling
+                    limits = httpx.Limits(
+                        max_keepalive_connections=10,
+                        max_connections=20,
+                        keepalive_expiry=30
+                    )
+                    cls._http_client = httpx.Client(
+                        limits=limits,
+                        timeout=60.0
+                    )
+        return cls._http_client
+    
     def __init__(self, api_key, topic="technology", model=None, enable_cache=True):
         """Initialize the content generator with OpenAI API key"""
         self.api_key = validate_api_key(api_key, "OpenAI API key")
-        self.client = openai.OpenAI(api_key=self.api_key)
+        
+        # Use shared HTTP client with connection pooling
+        http_client = self._get_http_client()
+        self.client = openai.OpenAI(api_key=self.api_key, http_client=http_client)
+        
         self.topic = topic
         self.model = model or Config.DEFAULT_MODEL
         # Initialize cache (1 hour TTL for API responses)
-        self.cache = SimpleCache(cache_dir='.cache/content_gen', ttl_seconds=3600) if enable_cache else None
+        self.cache = SimpleCache(cache_dir='.cache/content_gen', ttl_seconds=3600, max_size_mb=50) if enable_cache else None
         
     def _call_openai_api(self, system_prompt, user_prompt, max_tokens, temperature=0.7):
         """Centralized OpenAI API call with error handling and caching

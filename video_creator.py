@@ -5,6 +5,7 @@ Creates videos from scripts using text-to-speech and stock footage
 
 import os
 import tempfile
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from gtts import gTTS
 from moviepy.editor import (
     ImageClip, AudioFileClip, CompositeVideoClip, 
@@ -24,9 +25,15 @@ class VideoCreator:
         [(230, 126, 34), (241, 148, 138)], # Orange gradient
     ]
     
-    def __init__(self, output_dir="generated_videos"):
-        """Initialize the video creator"""
+    def __init__(self, output_dir="generated_videos", max_workers=2):
+        """Initialize the video creator
+        
+        Args:
+            output_dir: Directory for output videos
+            max_workers: Maximum parallel workers for batch processing
+        """
         self.output_dir = output_dir
+        self.max_workers = max_workers
         os.makedirs(output_dir, exist_ok=True)
         # Use secure temp directory
         self.temp_dir = tempfile.mkdtemp(prefix="youtube_video_", dir=tempfile.gettempdir())
@@ -143,7 +150,7 @@ class VideoCreator:
         return video
     
     def _render_video(self, video_clip, output_file):
-        """Render video clip to file
+        """Render video clip to file with optimized settings
         
         Args:
             video_clip: MoviePy video clip
@@ -161,7 +168,10 @@ class VideoCreator:
                 audio_codec='aac',
                 temp_audiofile=os.path.join(self.temp_dir, f'temp_audio_{get_timestamp_string()}.m4a'),
                 remove_temp=True,
-                logger=None  # Suppress verbose output
+                logger=None,  # Suppress verbose output
+                threads=4,  # Use multiple threads for encoding
+                preset='medium',  # Balance between speed and quality
+                audio_bitrate='128k'
             )
             return True
         except Exception as e:
@@ -242,3 +252,43 @@ class VideoCreator:
     def create_simple_video(self, script, title):
         """Create a simple video with solid color background"""
         return self.create_video(script, title, use_simple_bg=True)
+    
+    def create_videos_batch(self, video_specs):
+        """Create multiple videos in parallel (batch processing)
+        
+        Args:
+            video_specs: List of dicts with keys: script, title, use_simple_bg, output_file
+            
+        Returns:
+            List of (video_spec, output_file_or_none) tuples
+        """
+        results = []
+        
+        with ThreadPoolExecutor(max_workers=self.max_workers) as executor:
+            # Submit all tasks
+            future_to_spec = {
+                executor.submit(
+                    self.create_video,
+                    spec['script'],
+                    spec['title'],
+                    spec.get('use_simple_bg', True),
+                    spec.get('output_file')
+                ): spec
+                for spec in video_specs
+            }
+            
+            # Collect results as they complete
+            for future in as_completed(future_to_spec):
+                spec = future_to_spec[future]
+                try:
+                    output_file = future.result()
+                    results.append((spec, output_file))
+                    if output_file:
+                        print(f"Batch: Completed {spec['title']}")
+                    else:
+                        print(f"Batch: Failed {spec['title']}")
+                except Exception as e:
+                    print(f"Batch: Error processing {spec['title']}: {e}")
+                    results.append((spec, None))
+        
+        return results
