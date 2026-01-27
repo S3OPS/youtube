@@ -19,7 +19,7 @@ For step-by-step setup, see [QUICKSTART.md](QUICKSTART.md). In short:
 1. Install dependencies and ffmpeg.
 2. Configure `.env` (run `python setup.py` or copy `.env.example` and fill in required keys).
 3. Add `client_secrets.json` for YouTube API access.
-4. Run `python app.py` or `python create_video.py`.
+4. Run `python app.py` or `python create_video.py` (use Python 3.12/3.13).
 
 ## 📖 Usage
 
