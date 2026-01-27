@@ -4,13 +4,14 @@ This checklist has been consolidated to reduce duplicate setup steps.
 
 ## ✅ Use These Sources
 
-1. **Quick setup:** [QUICKSTART.md](QUICKSTART.md)
-2. **Full setup & automation flow:** [README.md](README.md)
-3. **Setup issues:** [TROUBLESHOOTING.md](TROUBLESHOOTING.md)
+1. **One command setup:** [SETUP_GUIDE.md](SETUP_GUIDE.md)
+2. **Quick setup:** [QUICKSTART.md](QUICKSTART.md)
+3. **Full setup & automation flow:** [README.md](README.md)
+4. **Setup issues:** [TROUBLESHOOTING.md](TROUBLESHOOTING.md)
 
 ## ✅ Minimal Verification
 
-- [ ] Follow [QUICKSTART.md](QUICKSTART.md) for setup steps
+- [ ] Follow [SETUP_GUIDE.md](SETUP_GUIDE.md) for setup steps
 - [ ] Run the full-auto CLI (preflight checks included):
   ```bash
   python create_video.py

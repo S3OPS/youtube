@@ -14,12 +14,12 @@ A **100% fully automated** content creation system that generates videos with AI
 
 ## 🚀 Quick Start
 
-For step-by-step setup, see [QUICKSTART.md](QUICKSTART.md). In short:
+For step-by-step setup, see [SETUP_GUIDE.md](SETUP_GUIDE.md). In short:
 
-1. Install dependencies and ffmpeg.
-2. Configure `.env` (run `python setup.py` or copy `.env.example` and fill in required keys).
+1. Run the one-command setup script (installs Python 3.12 + deps): `./setup.sh`
+2. Configure `.env` via the wizard or `.env.example`.
 3. Add `client_secrets.json` for YouTube API access.
-4. Run `python app.py` or `python create_video.py` (use Python 3.12/3.13).
+4. Run `python app.py` or `python create_video.py` (Python 3.12).
 
 ## 📖 Usage
 

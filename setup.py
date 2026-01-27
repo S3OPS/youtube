@@ -26,13 +26,13 @@ def check_dependencies():
     
     # Check Python version
     if sys.version_info < (3, 12):
-        print("❌ Python 3.12 or 3.13 is required")
+        print("❌ Python 3.12 is required")
         print(f"   Current version: {sys.version}")
         return False
     if sys.version_info >= (3, 14):
         print("❌ Python 3.14+ is not supported")
         print("   Pillow and lxml do not provide prebuilt wheels for Python 3.14 yet.")
-        print("   Please install Python 3.12 or 3.13 instead.")
+        print("   Please install Python 3.12 instead.")
         return False
     print(f"✓ Python {sys.version_info.major}.{sys.version_info.minor}")
     
@@ -52,18 +52,23 @@ def check_dependencies():
     
     # Check required Python packages
     required_packages = [
-        'flask', 'openai', 'google-api-python-client', 
-        'gtts', 'moviepy', 'python-dotenv'
+        ('flask', None),
+        ('openai', None),
+        ('googleapiclient', 'google-api-python-client'),
+        ('gtts', None),
+        ('moviepy', None),
+        ('dotenv', 'python-dotenv')
     ]
     
     missing_packages = []
-    for package in required_packages:
+    for module, package in required_packages:
+        display_name = package or module
         try:
-            __import__(package.replace('-', '_'))
-            print(f"✓ {package}")
+            __import__(module)
+            print(f"✓ {display_name}")
         except ImportError:
-            missing_packages.append(package)
-            print(f"❌ {package}")
+            missing_packages.append(display_name)
+            print(f"❌ {display_name}")
     
     if missing_packages:
         print(f"\n⚠️  Missing packages. Run: pip install -r requirements.txt")

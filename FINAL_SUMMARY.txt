@@ -89,7 +89,7 @@ HOW IT WORKS:
 
 TECHNOLOGY STACK:
 ----------------
-• Python 3.12/3.13 (Core application)
+• Python 3.12 (Core application)
 • Flask (Web framework)
 • OpenAI API (Content generation)
 • YouTube Data API v3 (Video uploads)

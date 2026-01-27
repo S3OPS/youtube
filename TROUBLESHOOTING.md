@@ -18,22 +18,15 @@ Common issues and their solutions.
 
 ### Python Version Error
 
-**Problem:** "Python 3.12 or 3.13 is required"
+**Problem:** "Python 3.12 is required"
 
 **Solution:**
 ```bash
 # Check your Python version
 python3 --version
 
-# Install Python 3.12 or 3.13 if needed (Pillow/lxml wheels are not available for 3.14 yet)
-# Ubuntu/Debian:
-sudo apt-get update
-sudo apt-get install python3.12
-
-# macOS:
-brew install python@3.12
-
-# Windows: Download from python.org
+# Install Python 3.12 if needed (Pillow/lxml wheels are not available for 3.14 yet)
+./setup.sh
 ```
 
 ### Package Installation Fails
@@ -100,8 +93,8 @@ brew install ffmpeg
 # Create .env from example
 cp .env.example .env
 
-# Or run setup wizard
-python setup.py
+# Or run the One Command setup
+./setup.sh
 ```
 
 ### Invalid OpenAI API Key
