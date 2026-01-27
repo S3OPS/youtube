@@ -224,6 +224,38 @@ def manage_config():
             return jsonify({'error': str(e)}), 500
 
 
+@app.route('/health')
+def health_check():
+    """
+    Health check endpoint for monitoring and container orchestration
+    
+    Returns HTTP 200 if the application is healthy
+    """
+    try:
+        # Basic health checks
+        health_status = {
+            'status': 'healthy',
+            'timestamp': datetime.now().isoformat(),
+            'version': '1.0.0'
+        }
+        
+        # Check if task service is available and working
+        if _HAS_SERVICES:
+            health_status['task_service'] = 'available'
+            health_status['queue_size'] = task_queue.qsize() if hasattr(task_queue, 'qsize') else 0
+        else:
+            with task_lock:
+                health_status['queue_size'] = task_queue.qsize()
+        
+        return jsonify(health_status), 200
+    except Exception as e:
+        return jsonify({
+            'status': 'unhealthy',
+            'error': str(e),
+            'timestamp': datetime.now().isoformat()
+        }), 503
+
+
 if __name__ == '__main__':
     port = int(os.getenv('FLASK_PORT', 5000))
     host = os.getenv('FLASK_HOST', '0.0.0.0')
