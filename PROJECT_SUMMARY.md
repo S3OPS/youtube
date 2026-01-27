@@ -125,7 +125,7 @@ A **complete, production-ready system** for fully automated YouTube content crea
 ## Technical Specifications
 
 ### Programming Languages
-- **Python 3.8+** - Core application
+- **Python 3.12/3.13** - Core application
 - **HTML5/CSS3/JavaScript** - Web dashboard
 - **Shell** - Setup scripts
 
@@ -320,7 +320,7 @@ youtube/
 ## Setup Requirements
 
 ### Prerequisites
-- Python 3.8+
+- Python 3.12/3.13
 - ffmpeg
 - OpenAI API key
 - Amazon Affiliate account

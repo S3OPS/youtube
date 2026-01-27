@@ -18,20 +18,20 @@ Common issues and their solutions.
 
 ### Python Version Error
 
-**Problem:** "Python 3.8 or higher is required"
+**Problem:** "Python 3.12 or 3.13 is required"
 
 **Solution:**
 ```bash
 # Check your Python version
 python3 --version
 
-# Install Python 3.8-3.13 if needed (Pillow/lxml wheels are not available for 3.14 yet)
+# Install Python 3.12 or 3.13 if needed (Pillow/lxml wheels are not available for 3.14 yet)
 # Ubuntu/Debian:
 sudo apt-get update
-sudo apt-get install python3.9
+sudo apt-get install python3.12
 
 # macOS:
-brew install python@3.9
+brew install python@3.12
 
 # Windows: Download from python.org
 ```

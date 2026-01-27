@@ -263,7 +263,7 @@ gunicorn -w 4 -b 0.0.0.0:5000 app:app
 
 ### Docker (Future)
 ```dockerfile
-FROM python:3.9
+FROM python:3.12
 # Install ffmpeg and dependencies
 # Copy application
 # Run server
