@@ -52,11 +52,11 @@ def check_dependencies():
     
     # Check required Python packages
     required_packages = [
-        ('flask', 'flask'),
-        ('openai', 'openai'),
+        ('flask', None),
+        ('openai', None),
         ('googleapiclient', 'google-api-python-client'),
-        ('gtts', 'gtts'),
-        ('moviepy', 'moviepy'),
+        ('gtts', None),
+        ('moviepy', None),
         ('dotenv', 'python-dotenv')
     ]
     
@@ -64,10 +64,10 @@ def check_dependencies():
     for module, package in required_packages:
         try:
             __import__(module)
-            print(f"✓ {package}")
+            print(f"✓ {package or module}")
         except ImportError:
-            missing_packages.append(package)
-            print(f"❌ {package}")
+            missing_packages.append(package or module)
+            print(f"❌ {package or module}")
     
     if missing_packages:
         print(f"\n⚠️  Missing packages. Run: pip install -r requirements.txt")

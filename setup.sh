@@ -90,6 +90,11 @@ setup_virtualenv() {
   local python_exec="python3.12"
   if ! command_exists "$python_exec"; then
     python_exec="python3"
+    if ! command_exists "$python_exec"; then
+      echo "❌ Python 3.12 is required to continue."
+      echo "   Re-run this script after installing Python 3.12."
+      exit 1
+    fi
   fi
   if ! "$python_exec" -c "import sys; sys.exit(0 if sys.version_info[:2] == (3, 12) else 1)"; then
     echo "❌ Python 3.12 is required to continue."
@@ -123,6 +128,7 @@ view_setup_docs() {
   local docs=(SETUP_GUIDE.md README.md QUICKSTART.md CHECKLIST.md TROUBLESHOOTING.md .env.example requirements.txt setup.py)
   local max_bytes=1048576
   local output_bytes=0
+  local truncate_lines=200
   for doc in "${docs[@]}"; do
     if [[ -f "$ROOT_DIR/$doc" ]]; then
       local size
@@ -130,7 +136,7 @@ view_setup_docs() {
       if (( output_bytes + size > max_bytes )); then
         echo
         echo "===== $doc (partial) ====="
-        head -n 200 "$ROOT_DIR/$doc"
+        head -n "$truncate_lines" "$ROOT_DIR/$doc"
         echo "…truncated. See $doc for full text."
         output_bytes=$max_bytes
         continue
@@ -139,6 +145,8 @@ view_setup_docs() {
       echo "===== $doc ====="
       cat "$ROOT_DIR/$doc"
       output_bytes=$((output_bytes + size))
+    else
+      echo "⚠️  Missing doc: $doc"
     fi
   done
   echo
