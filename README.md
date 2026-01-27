@@ -142,7 +142,7 @@ youtube/
 │   └── test_backward_compat.py   # Legacy compatibility tests
 │
 ├── Configuration
-│   ├── requirements.txt          # Python dependencies (Flask 3.0, OpenAI 1.6.1)
+│   ├── requirements.txt          # Python dependencies (Flask 3.0.0, OpenAI 1.6.1)
 │   ├── .env.example              # Environment variable template
 │   └── .gitignore                # Git ignore rules
 │
