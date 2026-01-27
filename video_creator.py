@@ -4,6 +4,7 @@ Creates videos from scripts using text-to-speech and stock footage
 """
 
 import os
+import tempfile
 from gtts import gTTS
 from moviepy.editor import (
     ImageClip, AudioFileClip, CompositeVideoClip, 
@@ -11,21 +12,31 @@ from moviepy.editor import (
 )
 from PIL import Image, ImageDraw, ImageFont
 import random
-from datetime import datetime
+from utils import get_timestamp_string
 
 
 class VideoCreator:
+    # Color schemes for backgrounds
+    COLOR_SCHEMES = [
+        [(41, 128, 185), (52, 152, 219)],  # Blue gradient
+        [(142, 68, 173), (155, 89, 182)],  # Purple gradient
+        [(39, 174, 96), (46, 204, 113)],   # Green gradient
+        [(230, 126, 34), (241, 148, 138)], # Orange gradient
+    ]
+    
     def __init__(self, output_dir="generated_videos"):
         """Initialize the video creator"""
         self.output_dir = output_dir
         os.makedirs(output_dir, exist_ok=True)
-        os.makedirs("temp", exist_ok=True)
+        # Use secure temp directory
+        self.temp_dir = tempfile.mkdtemp(prefix="youtube_video_", dir=tempfile.gettempdir())
+        os.chmod(self.temp_dir, 0o700)
     
     def text_to_speech(self, text, output_file=None):
         """Convert text to speech using gTTS"""
         if output_file is None:
-            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-            output_file = f"temp/audio_{timestamp}.mp3"
+            timestamp = get_timestamp_string()
+            output_file = os.path.join(self.temp_dir, f"audio_{timestamp}.mp3")
         
         try:
             tts = gTTS(text=text, lang='en', slow=False)
@@ -38,14 +49,7 @@ class VideoCreator:
     def create_background_image(self, width=1920, height=1080, color=None):
         """Create a simple background image"""
         if color is None:
-            # Random gradient colors
-            colors = [
-                [(41, 128, 185), (52, 152, 219)],  # Blue gradient
-                [(142, 68, 173), (155, 89, 182)],  # Purple gradient
-                [(39, 174, 96), (46, 204, 113)],   # Green gradient
-                [(230, 126, 34), (241, 148, 138)], # Orange gradient
-            ]
-            color = random.choice(colors)
+            color = random.choice(self.COLOR_SCHEMES)
         
         img = Image.new('RGB', (width, height), color[0])
         draw = ImageDraw.Draw(img)
@@ -58,37 +62,56 @@ class VideoCreator:
             b = int(color[0][2] * (1 - ratio) + color[1][2] * ratio)
             draw.line([(0, i), (width, i)], fill=(r, g, b))
         
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        output_file = f"temp/background_{timestamp}.png"
+        timestamp = get_timestamp_string()
+        output_file = os.path.join(self.temp_dir, f"background_{timestamp}.png")
         img.save(output_file)
         return output_file
     
-    def create_video_from_script(self, script, title, output_file=None):
-        """Create a video from a script"""
-        if output_file is None:
-            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-            output_file = f"{self.output_dir}/video_{timestamp}.mp4"
+    def _create_audio_clip(self, script):
+        """Create audio clip from script
+        
+        Returns:
+            Tuple of (audio_clip, audio_file_path) or (None, None) on error
+        """
+        print("Generating audio...")
+        audio_file = self.text_to_speech(script)
+        if not audio_file:
+            return None, None
         
         try:
-            # Create audio from script
-            print("Generating audio...")
-            audio_file = self.text_to_speech(script)
-            if not audio_file:
-                return None
-            
-            # Load audio to get duration
             audio_clip = AudioFileClip(audio_file)
-            duration = audio_clip.duration
+            return audio_clip, audio_file
+        except Exception as e:
+            print(f"Error loading audio: {e}")
+            return None, None
+    
+    def _create_video_clip(self, duration, title=None, use_simple_bg=True):
+        """Create video clip with background and optional title
+        
+        Args:
+            duration: Video duration in seconds
+            title: Optional title text to overlay
+            use_simple_bg: If True, use solid color; if False, use gradient image
             
-            # Create background image
-            print("Creating background...")
+        Returns:
+            Video clip or None on error
+        """
+        print("Creating background...")
+        
+        if use_simple_bg:
+            # Simple solid color background
+            video = ColorClip(
+                size=(1920, 1080),
+                color=(41, 128, 185),
+                duration=duration
+            )
+        else:
+            # Gradient background image
             bg_image_file = self.create_background_image()
-            
-            # Create video clip from image
-            image_clip = ImageClip(bg_image_file).set_duration(duration)
-            
-            # Add title text
-            print("Adding title...")
+            video = ImageClip(bg_image_file).set_duration(duration)
+        
+        # Add title if provided
+        if title and not use_simple_bg:
             try:
                 title_clip = TextClip(
                     title,
@@ -100,83 +123,87 @@ class VideoCreator:
                     align='center'
                 ).set_position('center').set_duration(duration)
                 
-                # Composite video and text
-                video = CompositeVideoClip([image_clip, title_clip])
+                video = CompositeVideoClip([video, title_clip])
             except Exception as e:
-                print(f"Text overlay error: {e}, using image only")
-                video = image_clip
+                print(f"Text overlay error: {e}, using background only")
+        
+        return video
+    
+    def _render_video(self, video_clip, output_file):
+        """Render video clip to file
+        
+        Args:
+            video_clip: MoviePy video clip
+            output_file: Output file path
             
-            # Add audio to video
-            final_video = video.set_audio(audio_clip)
-            
-            # Write the video file
+        Returns:
+            True on success, False on error
+        """
+        try:
             print(f"Rendering video to {output_file}...")
-            final_video.write_videofile(
+            video_clip.write_videofile(
                 output_file,
                 fps=24,
                 codec='libx264',
                 audio_codec='aac',
-                temp_audiofile=f'temp/temp_audio_{datetime.now().strftime("%Y%m%d_%H%M%S")}.m4a',
-                remove_temp=True
+                temp_audiofile=os.path.join(self.temp_dir, f'temp_audio_{get_timestamp_string()}.m4a'),
+                remove_temp=True,
+                logger=None  # Suppress verbose output
             )
-            
-            # Clean up
-            audio_clip.close()
-            final_video.close()
-            
-            # Remove temp files
-            if os.path.exists(audio_file):
-                os.remove(audio_file)
-            if os.path.exists(bg_image_file):
-                os.remove(bg_image_file)
-            
-            print(f"Video created successfully: {output_file}")
-            return output_file
-            
+            return True
         except Exception as e:
-            print(f"Error creating video: {e}")
-            return None
+            print(f"Error rendering video: {e}")
+            return False
     
-    def create_simple_video(self, script, title):
-        """Simplified video creation with basic visuals"""
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        output_file = f"{self.output_dir}/video_{timestamp}.mp4"
+    def _cleanup_temp_files(self, *file_paths):
+        """Clean up temporary files"""
+        for file_path in file_paths:
+            if file_path and os.path.exists(file_path):
+                try:
+                    os.remove(file_path)
+                except Exception as e:
+                    print(f"Warning: Could not remove temp file {file_path}: {e}")
+    
+    def create_video(self, script, title, use_simple_bg=True, output_file=None):
+        """Create a video from a script (unified method)
+        
+        Args:
+            script: Video script text
+            title: Video title
+            use_simple_bg: If True, use simple solid background; if False, use gradient
+            output_file: Optional output file path
+            
+        Returns:
+            Output file path on success, None on error
+        """
+        if output_file is None:
+            timestamp = get_timestamp_string()
+            output_file = f"{self.output_dir}/video_{timestamp}.mp4"
+        
+        audio_clip = None
+        video_clip = None
+        audio_file = None
+        bg_file = None
         
         try:
-            # Create audio
-            print("Generating audio...")
-            audio_file = self.text_to_speech(script)
-            if not audio_file:
+            # Step 1: Create audio
+            audio_clip, audio_file = self._create_audio_clip(script)
+            if not audio_clip:
                 return None
             
-            audio_clip = AudioFileClip(audio_file)
             duration = audio_clip.duration
             
-            # Create a simple colored background
-            print("Creating background...")
-            video = ColorClip(
-                size=(1920, 1080),
-                color=(41, 128, 185),
-                duration=duration
-            )
+            # Step 2: Create video with background
+            video_clip = self._create_video_clip(duration, title if not use_simple_bg else None, use_simple_bg)
+            if not video_clip:
+                return None
             
-            # Add audio
-            final_video = video.set_audio(audio_clip)
+            # Step 3: Combine video and audio
+            final_video = video_clip.set_audio(audio_clip)
             
-            # Write video
-            print(f"Rendering video to {output_file}...")
-            final_video.write_videofile(
-                output_file,
-                fps=24,
-                codec='libx264',
-                audio_codec='aac'
-            )
-            
-            # Clean up
-            audio_clip.close()
-            final_video.close()
-            if os.path.exists(audio_file):
-                os.remove(audio_file)
+            # Step 4: Render to file
+            if not self._render_video(final_video, output_file):
+                return None
             
             print(f"Video created successfully: {output_file}")
             return output_file
@@ -184,3 +211,20 @@ class VideoCreator:
         except Exception as e:
             print(f"Error creating video: {e}")
             return None
+        finally:
+            # Clean up resources
+            if audio_clip:
+                audio_clip.close()
+            if video_clip:
+                video_clip.close()
+            # Clean up temp files
+            self._cleanup_temp_files(audio_file)
+    
+    # Keep these methods for backward compatibility
+    def create_video_from_script(self, script, title, output_file=None):
+        """Create a video from a script with gradient background"""
+        return self.create_video(script, title, use_simple_bg=False, output_file=output_file)
+    
+    def create_simple_video(self, script, title):
+        """Create a simple video with solid color background"""
+        return self.create_video(script, title, use_simple_bg=True)
