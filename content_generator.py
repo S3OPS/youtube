@@ -20,8 +20,15 @@ class ContentGenerator:
     _client_lock = None
     
     @classmethod
-    def _get_http_client(cls):
-        """Get or create shared HTTP client with connection pooling"""
+    def _get_http_client(cls, timeout=60.0):
+        """Get or create shared HTTP client with connection pooling
+        
+        Args:
+            timeout: Timeout for HTTP requests in seconds
+            
+        Returns:
+            Shared httpx.Client instance
+        """
         if cls._http_client is None:
             if cls._client_lock is None:
                 import threading
@@ -37,16 +44,24 @@ class ContentGenerator:
                     )
                     cls._http_client = httpx.Client(
                         limits=limits,
-                        timeout=60.0
+                        timeout=timeout
                     )
         return cls._http_client
     
-    def __init__(self, api_key, topic="technology", model=None, enable_cache=True):
-        """Initialize the content generator with OpenAI API key"""
+    def __init__(self, api_key, topic="technology", model=None, enable_cache=True, api_timeout=60.0):
+        """Initialize the content generator with OpenAI API key
+        
+        Args:
+            api_key: OpenAI API key
+            topic: Content topic
+            model: OpenAI model to use
+            enable_cache: Enable caching of API responses
+            api_timeout: Timeout for API calls in seconds (default: 60)
+        """
         self.api_key = validate_api_key(api_key, "OpenAI API key")
         
         # Use shared HTTP client with connection pooling
-        http_client = self._get_http_client()
+        http_client = self._get_http_client(api_timeout)
         self.client = openai.OpenAI(api_key=self.api_key, http_client=http_client)
         
         self.topic = topic

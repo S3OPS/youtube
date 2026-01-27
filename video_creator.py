@@ -253,15 +253,19 @@ class VideoCreator:
         """Create a simple video with solid color background"""
         return self.create_video(script, title, use_simple_bg=True)
     
-    def create_videos_batch(self, video_specs):
+    def create_videos_batch(self, video_specs, max_batch_size=10):
         """Create multiple videos in parallel (batch processing)
         
         Args:
             video_specs: List of dicts with keys: script, title, use_simple_bg, output_file
+            max_batch_size: Maximum number of videos to process in one batch (default: 10)
             
         Returns:
             List of (video_spec, output_file_or_none) tuples
         """
+        if len(video_specs) > max_batch_size:
+            raise ValueError(f"Batch size {len(video_specs)} exceeds maximum {max_batch_size}")
+        
         results = []
         
         with ThreadPoolExecutor(max_workers=self.max_workers) as executor:

@@ -30,12 +30,14 @@ shutdown_flag = threading.Event()
 
 def task_worker():
     """Background worker to process video creation tasks"""
+    from queue import Empty
+    
     while not shutdown_flag.is_set():
         try:
             # Use timeout to allow checking shutdown flag
             try:
                 task_id, task_type = task_queue.get(timeout=1)
-            except:
+            except Empty:
                 continue
             
             if task_type == 'create_video':

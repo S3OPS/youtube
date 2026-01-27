@@ -144,36 +144,50 @@ class SimpleCache:
             print(f"Error invalidating cache: {e}")
             return False
     
+    def _get_cache_size_and_files(self):
+        """Get cache size and file list in a single pass
+        
+        Returns:
+            Tuple of (size_mb, files_list) where files_list is [(mtime, path), ...]
+        """
+        total_size = 0
+        files = []
+        try:
+            for filename in os.listdir(self.cache_dir):
+                file_path = os.path.join(self.cache_dir, filename)
+                if os.path.isfile(file_path):
+                    size = os.path.getsize(file_path)
+                    total_size += size
+                    mtime = os.path.getmtime(file_path)
+                    files.append((mtime, file_path))
+        except Exception as e:
+            print(f"Error calculating cache size: {e}")
+        return total_size / (1024 * 1024), files
+    
     def get_size(self):
         """Get total cache size in MB
         
         Returns:
             Cache size in megabytes
         """
-        total_size = 0
-        try:
-            for filename in os.listdir(self.cache_dir):
-                file_path = os.path.join(self.cache_dir, filename)
-                if os.path.isfile(file_path):
-                    total_size += os.path.getsize(file_path)
-        except Exception as e:
-            print(f"Error calculating cache size: {e}")
-        return total_size / (1024 * 1024)
+        size_mb, _ = self._get_cache_size_and_files()
+        return size_mb
     
     def _evict_if_needed(self):
         """Evict old entries if cache exceeds max size"""
-        if self.get_size() > self.max_size_mb:
-            self._evict_oldest()
+        size_mb, files = self._get_cache_size_and_files()
+        if size_mb > self.max_size_mb:
+            self._evict_oldest(files)
     
-    def _evict_oldest(self):
-        """Evict oldest cache entries to free up space"""
+    def _evict_oldest(self, files=None):
+        """Evict oldest cache entries to free up space
+        
+        Args:
+            files: Optional pre-computed file list to avoid re-scanning
+        """
         try:
-            files = []
-            for filename in os.listdir(self.cache_dir):
-                file_path = os.path.join(self.cache_dir, filename)
-                if os.path.isfile(file_path):
-                    mtime = os.path.getmtime(file_path)
-                    files.append((mtime, file_path))
+            if files is None:
+                _, files = self._get_cache_size_and_files()
             
             # Sort by modification time and remove configured percentage
             files.sort()
