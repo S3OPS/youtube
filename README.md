@@ -16,14 +16,28 @@ A **100% fully automated** content creation system that generates videos with AI
 
 ## 🚀 Quick Start
 
-For step-by-step setup, see [SETUP_GUIDE.md](SETUP_GUIDE.md). In short:
+**For detailed installation options and deployment guides, see:**
+- 📖 **[INSTALLATION_GUIDE.md](INSTALLATION_GUIDE.md)** - Complete installation guide with Docker, systemd, and cloud deployment
+- 🚀 **[DEPLOYMENT_GUIDE.md](DEPLOYMENT_GUIDE.md)** - Production deployment with nginx, SSL, monitoring, and security
+- 🧙 **[SETUP_GUIDE.md](SETUP_GUIDE.md)** - Original quick setup guide
+
+### Quick Install (Local Development)
 
 1. Run the one-command setup script (installs Python 3.12+ and dependencies): `./setup.sh`
 2. Configure `.env` via the interactive wizard (`python setup.py`) or copy from `.env.example`
 3. Add `client_secrets.json` for YouTube API access
 4. Run `python app.py` (web dashboard) or `python create_video.py` (CLI)
 
-**Requirements:** Python 3.12+, ffmpeg
+### Quick Install (Docker - Recommended for Production)
+
+```bash
+git clone https://github.com/S3OPS/youtube.git
+cd youtube
+cp .env.example .env  # Edit with your API keys
+docker-compose up -d
+```
+
+**Requirements:** Python 3.12+ and ffmpeg (for local) OR Docker (for containerized)
 
 ## 📖 Usage
 
@@ -152,6 +166,8 @@ youtube/
 │
 └── Documentation
     ├── README.md                 # This file
+    ├── INSTALLATION_GUIDE.md     # **NEW** Complete installation & deployment options
+    ├── DEPLOYMENT_GUIDE.md       # **NEW** Production deployment guide
     ├── SETUP_GUIDE.md            # Setup instructions
     ├── QUICKSTART.md             # 5-minute quick start
     ├── API.md                    # API reference

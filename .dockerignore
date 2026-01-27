@@ -1,0 +1,67 @@
+# Git
+.git
+.gitignore
+.github
+
+# Python
+__pycache__
+*.py[cod]
+*$py.class
+*.so
+.Python
+.venv
+venv/
+ENV/
+env/
+.env
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Documentation (will be copied separately if needed)
+*.md
+docs/
+
+# Test files
+test_*.py
+tests/
+
+# Cache and temporary files
+.cache/
+*.log
+logs/
+*.tmp
+*.temp
+
+# Media files (generated at runtime)
+*.mp4
+*.mp3
+*.wav
+videos/
+audio/
+
+# Data files (should be in volumes)
+data/
+*.json
+!client_secrets.json
+!requirements.txt
+
+# Build artifacts
+dist/
+build/
+*.egg-info/
+
+# Coverage reports
+htmlcov/
+.coverage
+.coverage.*
+.pytest_cache/
+
+# Other
+*.bak
+*.orig

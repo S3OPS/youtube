@@ -1,0 +1,45 @@
+[Unit]
+Description=YouTube Automation Service
+Documentation=https://github.com/S3OPS/youtube
+After=network.target network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+
+# Change these to match your setup
+User=YOUR_USERNAME
+Group=YOUR_USERNAME
+WorkingDirectory=/path/to/youtube
+
+# Virtual environment path
+Environment="PATH=/path/to/youtube/.venv/bin:/usr/local/bin:/usr/bin:/bin"
+
+# Load environment variables from .env file
+EnvironmentFile=/path/to/youtube/.env
+
+# Start the application
+ExecStart=/path/to/youtube/.venv/bin/python app.py
+
+# Restart policy
+Restart=always
+RestartSec=10
+
+# Security settings
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/path/to/youtube/data /path/to/youtube/.cache /path/to/youtube/logs
+
+# Logging
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=youtube-automation
+
+# Resource limits (adjust as needed)
+LimitNOFILE=65536
+MemoryLimit=2G
+
+[Install]
+WantedBy=multi-user.target
