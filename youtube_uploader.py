@@ -9,7 +9,8 @@ from google.auth.transport.requests import Request
 from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
 from googleapiclient.http import MediaFileUpload
-from datetime import datetime
+from googleapiclient.errors import HttpError
+from utils import get_secure_directory
 
 
 class YouTubeUploader:
@@ -22,35 +23,80 @@ class YouTubeUploader:
         self.client_secrets_file = client_secrets_file
         self.youtube = None
         self.credentials = None
+        # Store credentials in secure user directory
+        self.creds_dir = get_secure_directory('credentials')
+        self.token_file = os.path.join(self.creds_dir, 'token.pickle')
+    
+    def _load_saved_credentials(self):
+        """Load saved credentials from file"""
+        if os.path.exists(self.token_file):
+            try:
+                with open(self.token_file, 'rb') as token:
+                    return pickle.load(token)
+            except Exception as e:
+                print(f"Error loading saved credentials: {e}")
+        return None
+    
+    def _save_credentials(self, credentials):
+        """Save credentials to file"""
+        try:
+            with open(self.token_file, 'wb') as token:
+                pickle.dump(credentials, token)
+            return True
+        except Exception as e:
+            print(f"Error saving credentials: {e}")
+            return False
+    
+    def _refresh_credentials(self, credentials):
+        """Refresh expired credentials"""
+        try:
+            credentials.refresh(Request())
+            return True
+        except Exception as e:
+            print(f"Error refreshing credentials: {e}")
+            return False
+    
+    def _create_new_credentials(self):
+        """Create new credentials via OAuth flow"""
+        if not os.path.exists(self.client_secrets_file):
+            print(f"Error: {self.client_secrets_file} not found!")
+            print("Please download OAuth 2.0 credentials from Google Cloud Console")
+            return None
+        
+        try:
+            flow = InstalledAppFlow.from_client_secrets_file(
+                self.client_secrets_file, self.SCOPES)
+            return flow.run_local_server(port=0)
+        except Exception as e:
+            print(f"Error creating new credentials: {e}")
+            return None
     
     def authenticate(self):
         """Authenticate with YouTube API"""
         # Load credentials from file if they exist
-        if os.path.exists('token.pickle'):
-            with open('token.pickle', 'rb') as token:
-                self.credentials = pickle.load(token)
+        self.credentials = self._load_saved_credentials()
         
         # If there are no valid credentials, let the user log in
         if not self.credentials or not self.credentials.valid:
             if self.credentials and self.credentials.expired and self.credentials.refresh_token:
-                self.credentials.refresh(Request())
+                if not self._refresh_credentials(self.credentials):
+                    self.credentials = self._create_new_credentials()
             else:
-                if not os.path.exists(self.client_secrets_file):
-                    print(f"Error: {self.client_secrets_file} not found!")
-                    print("Please download OAuth 2.0 credentials from Google Cloud Console")
-                    return False
-                
-                flow = InstalledAppFlow.from_client_secrets_file(
-                    self.client_secrets_file, self.SCOPES)
-                self.credentials = flow.run_local_server(port=0)
+                self.credentials = self._create_new_credentials()
+            
+            if not self.credentials:
+                return False
             
             # Save credentials for future use
-            with open('token.pickle', 'wb') as token:
-                pickle.dump(self.credentials, token)
+            self._save_credentials(self.credentials)
         
         # Build the YouTube service
-        self.youtube = build('youtube', 'v3', credentials=self.credentials)
-        return True
+        try:
+            self.youtube = build('youtube', 'v3', credentials=self.credentials)
+            return True
+        except Exception as e:
+            print(f"Error building YouTube service: {e}")
+            return False
     
     def upload_video(self, video_file, title, description, category_id='22', 
                      privacy_status='public', tags=None, made_for_kids=False):
@@ -119,6 +165,9 @@ class YouTubeUploader:
             
             return video_id
             
+        except HttpError as e:
+            print(f"HTTP error uploading video: {e}")
+            return None
         except Exception as e:
             print(f"Error uploading video: {e}")
             return None
@@ -156,6 +205,9 @@ class YouTubeUploader:
             print(f"Video description updated successfully")
             return True
             
+        except HttpError as e:
+            print(f"HTTP error updating video: {e}")
+            return False
         except Exception as e:
             print(f"Error updating video: {e}")
             return False

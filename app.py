@@ -5,27 +5,17 @@ Provides a single-page dashboard for the automated content system
 
 from flask import Flask, render_template, jsonify, request
 import os
-from dotenv import load_dotenv
+from config import Config
 from automation_engine import AutomationEngine
 import threading
 
-# Load environment variables
-load_dotenv()
-
 app = Flask(__name__)
 
-# Initialize automation engine
-config = {
-    'openai_api_key': os.getenv('OPENAI_API_KEY'),
-    'amazon_affiliate_tag': os.getenv('AMAZON_AFFILIATE_TAG', 'youraffid-20'),
-    'content_topic': os.getenv('CONTENT_TOPIC', 'technology'),
-    'content_frequency': os.getenv('CONTENT_FREQUENCY', 'daily'),
-    'video_output_dir': 'generated_videos',
-    'youtube_client_secrets': 'client_secrets.json',
-    'video_privacy': os.getenv('VIDEO_PRIVACY', 'public')
-}
+# Initialize configuration
+config_manager = Config()
 
-automation = AutomationEngine(config)
+# Initialize automation engine
+automation = AutomationEngine(config_manager.config)
 
 
 @app.route('/')
@@ -80,15 +70,19 @@ def create_video():
 def manage_config():
     """Get or update configuration"""
     if request.method == 'GET':
-        return jsonify(config)
+        return jsonify(config_manager.to_dict())
     else:
         try:
             data = request.json
-            # Update config
-            for key in ['content_topic', 'content_frequency']:
-                if key in data:
-                    config[key] = data[key]
-            return jsonify({'status': 'success', 'config': config})
+            # Update config with validation
+            success, error = config_manager.update(data)
+            if success:
+                # Update automation engine config as well
+                for key, value in data.items():
+                    automation.config[key] = value
+                return jsonify({'status': 'success', 'config': config_manager.to_dict()})
+            else:
+                return jsonify({'status': 'error', 'error': error}), 400
         except Exception as e:
             return jsonify({'error': str(e)}), 500
 

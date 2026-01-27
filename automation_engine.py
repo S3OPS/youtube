@@ -12,6 +12,7 @@ from content_generator import ContentGenerator
 from amazon_affiliate import AmazonAffiliate
 from video_creator import VideoCreator
 from youtube_uploader import YouTubeUploader
+from utils import load_json_file, save_json_file
 
 
 class AutomationEngine:
@@ -43,21 +44,113 @@ class AutomationEngine:
     
     def _load_history(self):
         """Load automation history from file"""
-        if os.path.exists(self.history_file):
-            try:
-                with open(self.history_file, 'r') as f:
-                    self.history = json.load(f)
-            except Exception as e:
-                print(f"Error loading history: {e}")
-                self.history = []
+        self.history = load_json_file(self.history_file, default=[])
+        if not self.history:
+            print(f"No existing history found or failed to load from {self.history_file}")
     
     def _save_history(self):
         """Save automation history to file"""
-        try:
-            with open(self.history_file, 'w') as f:
-                json.dump(self.history, f, indent=2)
-        except Exception as e:
-            print(f"Error saving history: {e}")
+        save_json_file(self.history_file, self.history)
+    
+    def _generate_content(self, entry):
+        """Generate script, title, description, and keywords
+        
+        Args:
+            entry: Dictionary to populate with generated content
+            
+        Returns:
+            Tuple of (script, title, description_with_links, keywords) or (None, ...) on error
+        """
+        # Step 1: Generate script
+        print("Step 1: Generating video script...")
+        script = self.content_gen.generate_video_script()
+        if not script:
+            raise Exception("Failed to generate script")
+        print(f"Script generated ({len(script)} characters)")
+        entry['script_length'] = len(script)
+        
+        # Save script
+        script_file = self.content_gen.save_script(script)
+        entry['script_file'] = script_file
+        
+        # Step 2: Generate title and description
+        print("\nStep 2: Generating title and description...")
+        title, description = self.content_gen.generate_title_and_description(script)
+        print(f"Title: {title}")
+        entry['title'] = title
+        
+        # Step 3: Generate product keywords for affiliate links
+        print("\nStep 3: Generating Amazon affiliate links...")
+        keywords = self.content_gen.generate_product_keywords(script)
+        print(f"Keywords: {', '.join(keywords)}")
+        entry['keywords'] = keywords
+        
+        # Add affiliate links to description
+        description_with_links = self.amazon_affiliate.format_description_with_links(
+            description, keywords
+        )
+        entry['description'] = description_with_links
+        
+        return script, title, description_with_links, keywords
+    
+    def _create_video_file(self, script, title, entry):
+        """Create video file from script
+        
+        Args:
+            script: Video script text
+            title: Video title
+            entry: Dictionary to populate with video info
+            
+        Returns:
+            Path to created video file or None on error
+        """
+        print("\nStep 4: Creating video...")
+        video_file = self.video_creator.create_simple_video(script, title)
+        if not video_file:
+            raise Exception("Video creation failed - video_creator.create_simple_video returned None")
+        print(f"Video created: {video_file}")
+        entry['video_file'] = video_file
+        return video_file
+    
+    def _upload_to_youtube(self, video_file, title, description, keywords, entry):
+        """Upload video to YouTube
+        
+        Args:
+            video_file: Path to video file
+            title: Video title
+            description: Video description
+            keywords: List of keywords/tags
+            entry: Dictionary to populate with upload info
+            
+        Returns:
+            Video ID on success, None on error
+        """
+        print("\nStep 5: Uploading to YouTube...")
+        video_id = self.youtube_uploader.upload_video(
+            video_file=video_file,
+            title=title,
+            description=description,
+            tags=keywords,
+            privacy_status=self.config.get('video_privacy', 'public')
+        )
+        
+        if video_id:
+            entry['video_id'] = video_id
+            entry['video_url'] = f"https://www.youtube.com/watch?v={video_id}"
+            print(f"\n✓ Success! Video uploaded: {entry['video_url']}")
+            return video_id
+        else:
+            print("\n✗ Failed to upload video")
+            return None
+    
+    def _record_history(self, entry):
+        """Record the automation run in history
+        
+        Args:
+            entry: Dictionary containing automation run details
+        """
+        self.history.append(entry)
+        self._save_history()
     
     def create_and_upload_video(self):
         """Complete workflow: generate content, create video, upload to YouTube"""
@@ -71,62 +164,20 @@ class AutomationEngine:
         }
         
         try:
-            # Step 1: Generate script
-            print("Step 1: Generating video script...")
-            script = self.content_gen.generate_video_script()
-            if not script:
-                raise Exception("Failed to generate script")
-            print(f"Script generated ({len(script)} characters)")
-            entry['script_length'] = len(script)
+            # Generate content
+            script, title, description, keywords = self._generate_content(entry)
             
-            # Save script
-            script_file = self.content_gen.save_script(script)
-            entry['script_file'] = script_file
+            # Create video
+            video_file = self._create_video_file(script, title, entry)
             
-            # Step 2: Generate title and description
-            print("\nStep 2: Generating title and description...")
-            title, description = self.content_gen.generate_title_and_description(script)
-            print(f"Title: {title}")
-            entry['title'] = title
+            # Upload to YouTube
+            video_id = self._upload_to_youtube(video_file, title, description, keywords, entry)
             
-            # Step 3: Generate product keywords for affiliate links
-            print("\nStep 3: Generating Amazon affiliate links...")
-            keywords = self.content_gen.generate_product_keywords(script)
-            print(f"Keywords: {', '.join(keywords)}")
-            entry['keywords'] = keywords
-            
-            # Add affiliate links to description
-            description_with_links = self.amazon_affiliate.format_description_with_links(
-                description, keywords
-            )
-            entry['description'] = description_with_links
-            
-            # Step 4: Create video
-            print("\nStep 4: Creating video...")
-            video_file = self.video_creator.create_simple_video(script, title)
-            if not video_file:
-                raise Exception("Video creation failed - video_creator.create_simple_video returned None")
-            print(f"Video created: {video_file}")
-            entry['video_file'] = video_file
-            
-            # Step 5: Upload to YouTube
-            print("\nStep 5: Uploading to YouTube...")
-            video_id = self.youtube_uploader.upload_video(
-                video_file=video_file,
-                title=title,
-                description=description_with_links,
-                tags=keywords,
-                privacy_status=self.config.get('video_privacy', 'public')
-            )
-            
+            # Set final status
             if video_id:
-                entry['video_id'] = video_id
-                entry['video_url'] = f"https://www.youtube.com/watch?v={video_id}"
                 entry['status'] = 'success'
-                print(f"\n✓ Success! Video uploaded: {entry['video_url']}")
             else:
                 entry['status'] = 'upload_failed'
-                print("\n✗ Failed to upload video")
             
         except Exception as e:
             entry['status'] = 'failed'
@@ -134,8 +185,7 @@ class AutomationEngine:
             print(f"\n✗ Error: {e}")
         
         # Save to history
-        self.history.append(entry)
-        self._save_history()
+        self._record_history(entry)
         
         print(f"\n{'='*60}")
         print(f"Completed - {datetime.now()}")
