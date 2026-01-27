@@ -42,6 +42,10 @@ generated_videos/
 generated_scripts/
 output/
 temp/
+automation_history.json
+
+# Cache
+.cache/
 
 # OAuth credentials
 token.pickle

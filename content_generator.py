@@ -10,18 +10,21 @@ import random
 from functools import lru_cache
 from utils import get_timestamp_string, validate_api_key
 from config import Config
+from cache import SimpleCache
 
 
 class ContentGenerator:
-    def __init__(self, api_key, topic="technology", model=None):
+    def __init__(self, api_key, topic="technology", model=None, enable_cache=True):
         """Initialize the content generator with OpenAI API key"""
         self.api_key = validate_api_key(api_key, "OpenAI API key")
         self.client = openai.OpenAI(api_key=self.api_key)
         self.topic = topic
         self.model = model or Config.DEFAULT_MODEL
+        # Initialize cache (1 hour TTL for API responses)
+        self.cache = SimpleCache(cache_dir='.cache/content_gen', ttl_seconds=3600) if enable_cache else None
         
     def _call_openai_api(self, system_prompt, user_prompt, max_tokens, temperature=0.7):
-        """Centralized OpenAI API call with error handling
+        """Centralized OpenAI API call with error handling and caching
         
         Args:
             system_prompt: System role content
@@ -32,6 +35,16 @@ class ContentGenerator:
         Returns:
             API response content or None on error
         """
+        # Check cache if enabled
+        if self.cache:
+            cache_key = self.cache._get_cache_key(
+                self.model, system_prompt, user_prompt, max_tokens, temperature
+            )
+            cached_response = self.cache.get(cache_key)
+            if cached_response:
+                print("Using cached API response")
+                return cached_response
+        
         try:
             response = self.client.chat.completions.create(
                 model=self.model,
@@ -42,7 +55,13 @@ class ContentGenerator:
                 max_tokens=max_tokens,
                 temperature=temperature
             )
-            return response.choices[0].message.content.strip()
+            result = response.choices[0].message.content.strip()
+            
+            # Cache the response
+            if self.cache and result:
+                self.cache.set(cache_key, result)
+            
+            return result
         except openai.APIError as e:
             print(f"OpenAI API error: {e}")
             return None
