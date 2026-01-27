@@ -71,36 +71,41 @@ A **complete, production-ready system** for fully automated YouTube content crea
    - System architecture
    - Security guidelines
 
-2. **QUICKSTART.md** - 5-minute setup guide
+2. **SETUP_GUIDE.md** - One-command setup guide
+   - Single command setup flow
+   - Python 3.12 install
+   - Lord of the Rings themed walkthrough
+
+3. **QUICKSTART.md** - 5-minute setup guide
    - Step-by-step instructions
    - Quick commands
    - Common tips
 
-3. **API.md** - Complete API reference
+4. **API.md** - Complete API reference
    - All endpoints documented
    - Request/response examples
    - Python SDK examples
    - cURL examples
 
-4. **ARCHITECTURE.md** - System design
+5. **ARCHITECTURE.md** - System design
    - Component diagrams
    - Data flow documentation
    - Scalability considerations
    - Performance analysis
 
-5. **EXAMPLES.md** - 17 practical examples
+6. **EXAMPLES.md** - 17 practical examples
    - Basic usage
    - Customization
    - Scheduling
    - Integration patterns
    - Advanced workflows
 
-6. **CHECKLIST.md** - Getting started guide (consolidated)
+7. **CHECKLIST.md** - Getting started guide (consolidated)
    - Step-by-step verification
    - Troubleshooting embedded
    - Success criteria
 
-7. **TROUBLESHOOTING.md** - Problem solving
+8. **TROUBLESHOOTING.md** - Problem solving
    - Common issues
    - Detailed solutions
    - Debug techniques
@@ -125,7 +130,7 @@ A **complete, production-ready system** for fully automated YouTube content crea
 ## Technical Specifications
 
 ### Programming Languages
-- **Python 3.12/3.13** - Core application
+- **Python 3.12** - Core application
 - **HTML5/CSS3/JavaScript** - Web dashboard
 - **Shell** - Setup scripts
 
@@ -320,7 +325,7 @@ youtube/
 ## Setup Requirements
 
 ### Prerequisites
-- Python 3.12/3.13
+- Python 3.12
 - ffmpeg
 - OpenAI API key
 - Amazon Affiliate account

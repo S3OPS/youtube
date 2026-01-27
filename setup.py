@@ -26,13 +26,13 @@ def check_dependencies():
     
     # Check Python version
     if sys.version_info < (3, 12):
-        print("❌ Python 3.12 or 3.13 is required")
+        print("❌ Python 3.12 is required")
         print(f"   Current version: {sys.version}")
         return False
     if sys.version_info >= (3, 14):
         print("❌ Python 3.14+ is not supported")
         print("   Pillow and lxml do not provide prebuilt wheels for Python 3.14 yet.")
-        print("   Please install Python 3.12 or 3.13 instead.")
+        print("   Please install Python 3.12 instead.")
         return False
     print(f"✓ Python {sys.version_info.major}.{sys.version_info.minor}")
     
@@ -52,8 +52,8 @@ def check_dependencies():
     
     # Check required Python packages
     required_packages = [
-        'flask', 'openai', 'google-api-python-client', 
-        'gtts', 'moviepy', 'python-dotenv'
+        'flask', 'openai', 'googleapiclient',
+        'gtts', 'moviepy', 'dotenv'
     ]
     
     missing_packages = []

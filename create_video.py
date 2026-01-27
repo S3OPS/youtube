@@ -24,9 +24,9 @@ def run_preflight_checks():
     errors = []
 
     if sys.version_info < (3, 12):
-        errors.append(f"Python 3.12 or 3.13 required (current: {sys.version.split()[0]})")
+        errors.append(f"Python 3.12 required (current: {sys.version.split()[0]})")
     if sys.version_info >= (3, 14):
-        errors.append("Python 3.14+ is not supported (use Python 3.12 or 3.13 for Pillow/lxml wheels)")
+        errors.append("Python 3.14+ is not supported (use Python 3.12 for Pillow/lxml wheels)")
 
     required_modules = {
         'dotenv': 'python-dotenv',
