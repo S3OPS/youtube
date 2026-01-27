@@ -53,7 +53,7 @@ install_python_312() {
   fi
 
   echo "❌ Could not auto-install Python 3.12. Please install it manually:"
-  echo "   https://www.python.org/downloads/release/python-3120/"
+  echo "   https://www.python.org/downloads/"
   exit 1
 }
 
@@ -86,7 +86,16 @@ install_ffmpeg() {
 
 setup_virtualenv() {
   echo "🧝 Creating the Elven virtual environment..."
-  python3.12 -m venv "$ROOT_DIR/.venv"
+  local python_exec="python3.12"
+  if ! command_exists "$python_exec"; then
+    python_exec="python3"
+  fi
+  if ! "$python_exec" -c "import sys; sys.exit(0 if sys.version_info[:2] == (3, 12) else 1)"; then
+    echo "❌ Python 3.12 is required to continue."
+    echo "   Re-run this script after installing Python 3.12."
+    exit 1
+  fi
+  "$python_exec" -m venv "$ROOT_DIR/.venv"
 
   if [[ -f "$ROOT_DIR/.venv/bin/activate" ]]; then
     # shellcheck disable=SC1091
@@ -110,7 +119,7 @@ run_setup_wizard() {
 
 view_setup_docs() {
   echo "📜 Opening the Red Book of Westmarch (setup docs)..."
-  local docs=(SETUP_GUIDE.md README.md QUICKSTART.md CHECKLIST.md TROUBLESHOOTING.md .env.example)
+  local docs=(SETUP_GUIDE.md README.md QUICKSTART.md CHECKLIST.md TROUBLESHOOTING.md .env.example requirements.txt setup.py)
   local max_bytes=1048576
   local output_bytes=0
   for doc in "${docs[@]}"; do
