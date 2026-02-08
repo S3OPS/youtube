@@ -1,6 +1,6 @@
 # Everyday Essentials - Amazon Affiliate Site
 
-A ready-to-deploy website featuring 100+ everyday essential products with automatic Amazon affiliate link deep linking.
+A ready-to-deploy website featuring 96 everyday essential products with automatic Amazon affiliate link deep linking.
 
 ## 🚀 Quick Start
 
@@ -90,7 +90,7 @@ For advanced users wanting full control:
 
 ## 📋 Features
 
-- ✅ **100+ Product Links** - Curated everyday essentials across 12 categories
+- ✅ **96 Product Links** - Curated everyday essentials across 12 categories
 - ✅ **Automatic Affiliate Deep Linking** - All Amazon links automatically include your affiliate ID
 - ✅ **Responsive Design** - Works perfectly on desktop, tablet, and mobile
 - ✅ **No Backend Required** - Pure HTML/CSS/JavaScript
