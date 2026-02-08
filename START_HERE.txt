@@ -1,0 +1,55 @@
+╔═══════════════════════════════════════════════════════════════════════════╗
+║                   AMAZON AFFILIATE SITE - START HERE                      ║
+╔═══════════════════════════════════════════════════════════════════════════╗
+
+🎉 Your Amazon affiliate site is ready! Follow these 3 simple steps:
+
+📝 STEP 1: CONFIGURE YOUR AFFILIATE ID
+   ├─ Open: config.js
+   ├─ Replace: 'YOUR-AFFILIATE-ID-20'
+   └─ With: Your Amazon Associates tracking ID (e.g., 'mystore-20')
+
+🧪 STEP 2: TEST LOCALLY
+   ├─ Open: index.html in your browser
+   ├─ Click any product link
+   └─ Verify the URL includes: ?tag=your-id-20
+
+🚀 STEP 3: DEPLOY TO INTERNET
+
+   OPTION A - GitHub Pages (Free, Recommended)
+   ├─ Create a GitHub repository
+   ├─ Push these files: git add . && git commit -m "Initial" && git push
+   ├─ Go to Settings → Pages
+   └─ Select main branch → Save
+   
+   OPTION B - Netlify (Free, Instant)
+   ├─ Go to: netlify.com
+   └─ Drag and drop this folder
+   
+   OPTION C - Vercel (Free, Fast)
+   ├─ Go to: vercel.com
+   └─ Import your GitHub repo or upload files
+
+📚 DOCUMENTATION
+   ├─ README.md  - Full documentation
+   ├─ SETUP.md   - Quick setup guide
+   └─ This file  - Getting started
+
+✅ WHAT YOU GET
+   ├─ 96 curated everyday products
+   ├─ 12 product categories
+   ├─ Automatic affiliate link processing
+   ├─ Mobile-responsive design
+   ├─ Click tracking support
+   ├─ SEO-friendly structure
+   └─ Compliance-ready disclosure
+
+🎯 START EARNING
+   1. Add your affiliate ID
+   2. Deploy to the web
+   3. Drive traffic
+   4. Track earnings in Amazon Associates dashboard
+
+Need help? Check README.md for detailed instructions.
+
+╚═══════════════════════════════════════════════════════════════════════════╝
