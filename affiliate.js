@@ -58,15 +58,27 @@
         const images = document.querySelectorAll('.product-image');
         
         images.forEach(img => {
+            let retryCount = 0;
+            const maxRetries = 2;
+            
             // Add error handler for failed image loads
             img.addEventListener('error', function() {
                 console.warn('Failed to load image:', this.src);
-                // Use a placeholder or retry
-                this.style.backgroundColor = '#f0f0f0';
-                this.style.display = 'flex';
-                this.style.alignItems = 'center';
-                this.style.justifyContent = 'center';
-                this.alt = 'Image unavailable';
+                
+                if (retryCount < maxRetries) {
+                    retryCount++;
+                    // Try to reload the image with a cache-busting parameter
+                    const originalSrc = this.src.split('?')[0];
+                    this.src = originalSrc + '?retry=' + retryCount;
+                } else {
+                    // After retries, show placeholder
+                    this.style.backgroundColor = '#f0f0f0';
+                    this.style.display = 'flex';
+                    this.style.alignItems = 'center';
+                    this.style.justifyContent = 'center';
+                    this.style.minHeight = '200px';
+                    this.alt = 'Image unavailable';
+                }
             });
 
             // Add load handler for successful loads
