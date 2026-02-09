@@ -1,0 +1,136 @@
+/**
+ * Image Fallback Handler
+ * Handles cases where Amazon images are blocked by ad blockers or content blockers
+ */
+
+(function() {
+    'use strict';
+
+    // Wait for DOM to be fully loaded
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initImageFallback);
+    } else {
+        initImageFallback();
+    }
+
+    function initImageFallback() {
+        // Find all product images
+        const productImages = document.querySelectorAll('.product-image');
+        
+        console.log(`Setting up fallback for ${productImages.length} product images`);
+
+        // Add error handler to each image
+        productImages.forEach(img => {
+            // Create a placeholder gradient based on product name
+            const productCard = img.closest('.product-card');
+            const productName = productCard ? productCard.querySelector('h4')?.textContent : 'Product';
+            
+            img.addEventListener('error', function() {
+                // Replace with a styled placeholder
+                this.style.backgroundColor = '#1a0a0a';
+                this.style.display = 'flex';
+                this.style.alignItems = 'center';
+                this.style.justifyContent = 'center';
+                this.style.fontSize = '3rem';
+                this.style.color = '#ff0040';
+                this.style.textShadow = '0 0 10px rgba(255, 0, 64, 0.5)';
+                
+                // Add an icon based on category
+                const icon = getIconForProduct(productName);
+                this.alt = icon;
+                this.setAttribute('data-placeholder', icon);
+                
+                // Create a pseudo-element effect using CSS
+                this.classList.add('image-placeholder');
+            });
+
+            // Also handle successful loads
+            img.addEventListener('load', function() {
+                this.classList.add('image-loaded');
+            });
+
+            // Trigger load check for images that might be already cached
+            if (img.complete && img.naturalHeight === 0) {
+                img.dispatchEvent(new Event('error'));
+            }
+        });
+
+        // Add CSS for placeholder styling
+        addPlaceholderStyles();
+    }
+
+    function getIconForProduct(productName) {
+        const name = productName.toLowerCase();
+        
+        if (name.includes('phone') || name.includes('iphone') || name.includes('galaxy')) return '📱';
+        if (name.includes('laptop') || name.includes('macbook') || name.includes('computer')) return '💻';
+        if (name.includes('camera') || name.includes('canon') || name.includes('sony') || name.includes('nikon')) return '📷';
+        if (name.includes('tv') || name.includes('television') || name.includes('oled')) return '📺';
+        if (name.includes('headphone') || name.includes('airpod') || name.includes('earbuds')) return '🎧';
+        if (name.includes('tablet') || name.includes('ipad')) return '📲';
+        if (name.includes('watch') || name.includes('smartwatch')) return '⌚';
+        if (name.includes('speaker') || name.includes('soundbar') || name.includes('sonos')) return '🔊';
+        if (name.includes('drone') || name.includes('mavic')) return '🚁';
+        if (name.includes('coffee') || name.includes('espresso')) return '☕';
+        if (name.includes('vacuum') || name.includes('roomba')) return '🧹';
+        if (name.includes('air') && name.includes('fryer')) return '🍳';
+        if (name.includes('blender') || name.includes('vitamix')) return '🥤';
+        if (name.includes('refrigerator') || name.includes('fridge')) return '🧊';
+        if (name.includes('washer') || name.includes('dryer')) return '🧺';
+        if (name.includes('thermostat') || name.includes('nest')) return '🌡️';
+        if (name.includes('doorbell') || name.includes('ring')) return '🔔';
+        if (name.includes('game') || name.includes('playstation') || name.includes('xbox')) return '🎮';
+        if (name.includes('monitor') || name.includes('display')) return '🖥️';
+        if (name.includes('keyboard')) return '⌨️';
+        if (name.includes('mouse')) return '🖱️';
+        if (name.includes('router') || name.includes('wifi')) return '📡';
+        if (name.includes('fitness') || name.includes('treadmill') || name.includes('bike')) return '💪';
+        if (name.includes('yoga')) return '🧘';
+        if (name.includes('dumbbell') || name.includes('weight')) return '🏋️';
+        if (name.includes('protein') || name.includes('supplement')) return '🥤';
+        if (name.includes('bottle') || name.includes('water')) return '🧴';
+        
+        return '🛍️'; // Default shopping icon
+    }
+
+    function addPlaceholderStyles() {
+        if (document.getElementById('image-fallback-styles')) return;
+        
+        const style = document.createElement('style');
+        style.id = 'image-fallback-styles';
+        style.textContent = `
+            .image-placeholder {
+                position: relative;
+                background: linear-gradient(135deg, #1a0a0a 0%, #2a0a0a 50%, #1a0a0a 100%) !important;
+                border: 2px solid #ff0040 !important;
+            }
+            
+            .image-placeholder::after {
+                content: attr(data-placeholder);
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                font-size: 4rem;
+                filter: drop-shadow(0 0 10px rgba(255, 0, 64, 0.5));
+            }
+            
+            .image-loaded {
+                animation: imageReveal 0.5s ease-in-out;
+            }
+            
+            @keyframes imageReveal {
+                from {
+                    opacity: 0;
+                    filter: brightness(0.5);
+                }
+                to {
+                    opacity: 1;
+                    filter: brightness(0.9);
+                }
+            }
+        `;
+        document.head.appendChild(style);
+    }
+
+})();
