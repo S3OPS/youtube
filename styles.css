@@ -12,9 +12,6 @@
     --light-bg: #0a0a0a;
     --dark-bg: #000000;
     --border-color: #ff0040;
-    --shadow: 0 0 20px rgba(255, 0, 64, 0.3);
-    --hover-shadow: 0 0 30px rgba(255, 0, 64, 0.6);
-    --neon-glow: 0 0 5px #ff0040, 0 0 10px #ff0040, 0 0 15px #ff0040;
 }
 
 body {
@@ -22,14 +19,6 @@ body {
     line-height: 1.6;
     color: var(--text-color);
     background-color: var(--dark-bg);
-    background-image: 
-        repeating-linear-gradient(
-            0deg,
-            rgba(255, 0, 64, 0.03) 0px,
-            transparent 1px,
-            transparent 2px,
-            rgba(255, 0, 64, 0.03) 3px
-        );
 }
 
 .container {
@@ -38,51 +27,21 @@ body {
     padding: 0 20px;
 }
 
-/* Header - Cyberpunk Style */
+/* Header */
 header {
     background: linear-gradient(135deg, #000000, #1a0000, #000000);
     color: var(--primary-color);
     padding: 40px 20px;
     text-align: center;
-    box-shadow: var(--shadow);
     border-bottom: 2px solid var(--primary-color);
-    position: relative;
-    overflow: hidden;
-}
-
-header::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255, 0, 64, 0.1), transparent);
-    animation: scan 3s infinite;
-}
-
-@keyframes scan {
-    0% { left: -100%; }
-    100% { left: 100%; }
 }
 
 header h1 {
     font-size: 2.8rem;
     margin-bottom: 10px;
-    text-shadow: var(--neon-glow);
     font-weight: 700;
     letter-spacing: 3px;
     text-transform: uppercase;
-    animation: glitch 5s infinite;
-}
-
-@keyframes glitch {
-    0%, 90%, 100% {
-        text-shadow: var(--neon-glow);
-    }
-    92%, 98% {
-        text-shadow: 2px 0 #ff0040, -2px 0 #00ffff;
-    }
 }
 
 .tagline {
@@ -90,10 +49,9 @@ header h1 {
     opacity: 0.95;
     font-weight: 300;
     color: #ff3366;
-    text-shadow: 0 0 10px rgba(255, 0, 64, 0.5);
 }
 
-/* Main Content - Cyberpunk Style */
+/* Main Content */
 main {
     padding: 40px 0;
 }
@@ -103,30 +61,13 @@ main {
     margin-bottom: 50px;
     padding: 30px;
     background: var(--light-bg);
-    border-radius: 0;
     border: 2px solid var(--primary-color);
-    box-shadow: var(--shadow);
-    position: relative;
-}
-
-.intro::before {
-    content: '';
-    position: absolute;
-    top: -2px;
-    left: -2px;
-    right: -2px;
-    bottom: -2px;
-    background: linear-gradient(45deg, #ff0040, transparent, #ff0040);
-    z-index: -1;
-    border-radius: 0;
-    opacity: 0.3;
 }
 
 .intro h2 {
     color: var(--primary-color);
     margin-bottom: 15px;
     font-size: 2rem;
-    text-shadow: 0 0 10px rgba(255, 0, 64, 0.5);
     text-transform: uppercase;
     letter-spacing: 2px;
 }
@@ -138,7 +79,7 @@ main {
     color: #ccc;
 }
 
-/* Categories - Cyberpunk Style */
+/* Categories */
 .category {
     margin-bottom: 70px;
 }
@@ -152,52 +93,6 @@ main {
     font-weight: 700;
     letter-spacing: 2px;
     text-transform: uppercase;
-    text-shadow: 0 0 10px rgba(255, 0, 64, 0.5);
-    position: relative;
-    display: flex;
-    align-items: center;
-    gap: 15px;
-}
-
-.category h3::after {
-    content: '';
-    position: absolute;
-    bottom: -2px;
-    left: 0;
-    width: 100px;
-    height: 2px;
-    background: var(--primary-color);
-    box-shadow: 0 0 10px var(--primary-color);
-}
-
-/* Category Preview Thumbnail */
-.category-preview-link {
-    display: inline-block;
-    width: 60px;
-    height: 60px;
-    border: 2px solid var(--primary-color);
-    border-radius: 8px;
-    overflow: hidden;
-    box-shadow: 0 0 15px rgba(255, 0, 64, 0.4);
-    transition: all 0.3s ease;
-    flex-shrink: 0;
-}
-
-.category-preview-link:hover {
-    transform: scale(1.1);
-    box-shadow: 0 0 25px rgba(255, 0, 64, 0.8);
-    border-color: var(--secondary-color);
-}
-
-.category-preview-thumb {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
-}
-
-.category-title-text {
-    flex: 1;
 }
 
 /* Product Grid */
@@ -208,14 +103,12 @@ main {
     margin-bottom: 40px;
 }
 
-/* Product Cards - Cyberpunk Style */
+/* Product Cards */
 .product-card {
     background: var(--light-bg);
     border: 2px solid var(--border-color);
-    border-radius: 0;
     padding: 0;
     transition: all 0.3s ease;
-    box-shadow: var(--shadow);
     display: flex;
     flex-direction: column;
     justify-content: space-between;
@@ -223,64 +116,9 @@ main {
     position: relative;
 }
 
-.product-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(45deg, transparent 40%, rgba(255, 0, 64, 0.1) 50%, transparent 60%);
-    background-size: 200% 200%;
-    animation: shimmer 3s infinite;
-    pointer-events: none;
-}
-
-@keyframes shimmer {
-    0% { background-position: 100% 100%; }
-    100% { background-position: 0% 0%; }
-}
-
 .product-card:hover {
     transform: translateY(-5px);
-    box-shadow: var(--hover-shadow);
     border-color: var(--secondary-color);
-}
-
-.product-card:hover::before {
-    animation-duration: 1s;
-}
-
-/* Product Image Link Wrapper */
-.product-image-link {
-    display: block;
-    position: relative;
-    overflow: hidden;
-    cursor: pointer;
-}
-
-.product-image-link::after {
-    content: 'Click to View';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    background: rgba(0, 0, 0, 0.85);
-    color: var(--primary-color);
-    padding: 10px 20px;
-    border-radius: 5px;
-    border: 2px solid var(--primary-color);
-    opacity: 0;
-    transition: opacity 0.3s ease;
-    font-size: 0.9rem;
-    font-weight: bold;
-    text-shadow: 0 0 10px rgba(255, 0, 64, 0.8);
-    pointer-events: none;
-    white-space: nowrap;
-}
-
-.product-image-link:hover::after {
-    opacity: 1;
 }
 
 .product-image {
@@ -289,15 +127,7 @@ main {
     object-fit: cover;
     background: #0a0a0a;
     border-bottom: 2px solid var(--border-color);
-    filter: brightness(0.9) contrast(1.1);
-    transition: all 0.3s ease;
     display: block;
-}
-
-.product-card:hover .product-image,
-.product-image-link:hover .product-image {
-    filter: brightness(1) contrast(1.2);
-    transform: scale(1.05);
 }
 
 .product-content {
@@ -313,7 +143,6 @@ main {
     margin-bottom: 10px;
     min-height: 50px;
     line-height: 1.4;
-    text-shadow: 0 0 5px rgba(255, 0, 64, 0.3);
 }
 
 .product-card p {
@@ -331,11 +160,9 @@ main {
     background: linear-gradient(135deg, #ff0040, #cc0033);
     color: #fff;
     padding: 6px 12px;
-    border-radius: 0;
     font-size: 0.75rem;
     font-weight: 700;
     text-transform: uppercase;
-    box-shadow: 0 0 15px rgba(255, 0, 64, 0.6);
     letter-spacing: 1px;
     border: 1px solid var(--primary-color);
 }
@@ -345,7 +172,6 @@ main {
     font-weight: 700;
     color: var(--primary-color);
     margin-bottom: 15px;
-    text-shadow: 0 0 10px rgba(255, 0, 64, 0.4);
 }
 
 .product-rating {
@@ -359,22 +185,19 @@ main {
 .stars {
     color: var(--primary-color);
     font-size: 1rem;
-    text-shadow: 0 0 5px rgba(255, 0, 64, 0.3);
 }
 
 .review-count {
     color: var(--secondary-color);
-    cursor: pointer;
 }
 
-/* Amazon Link Buttons - Cyberpunk Style */
+/* Amazon Link Buttons */
 .amazon-link {
     display: block;
     background: linear-gradient(135deg, #ff0040, #cc0033);
     color: #fff;
     text-decoration: none;
     padding: 14px 24px;
-    border-radius: 0;
     font-weight: 600;
     text-align: center;
     transition: all 0.3s ease;
@@ -382,61 +205,29 @@ main {
     font-size: 1rem;
     text-transform: uppercase;
     letter-spacing: 1px;
-    box-shadow: 0 0 15px rgba(255, 0, 64, 0.4);
-    position: relative;
-    overflow: hidden;
-}
-
-.amazon-link::before {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 0;
-    height: 0;
-    border-radius: 50%;
-    background: rgba(255, 255, 255, 0.2);
-    transform: translate(-50%, -50%);
-    transition: width 0.6s, height 0.6s;
-}
-
-.amazon-link:hover::before {
-    width: 300px;
-    height: 300px;
 }
 
 .amazon-link:hover {
     background: linear-gradient(135deg, #ff3366, #ff0040);
     border-color: var(--secondary-color);
     transform: scale(1.02);
-    box-shadow: 0 0 25px rgba(255, 0, 64, 0.8);
 }
 
 .amazon-link:active {
     transform: scale(0.98);
 }
 
-/* Visual indicator for processed affiliate links */
-.affiliate-link-processed::after {
-    content: ' 🔗';
-    font-size: 0.8em;
-    opacity: 0.5;
-}
-
-/* Disclaimer Section - Cyberpunk Style */
+/* Disclaimer Section */
 .disclaimer {
     background: var(--light-bg);
     padding: 30px;
-    border-radius: 0;
     margin: 50px 0;
     border: 2px solid var(--primary-color);
-    box-shadow: var(--shadow);
 }
 
 .disclaimer h2 {
     color: var(--primary-color);
     margin-bottom: 15px;
-    text-shadow: 0 0 10px rgba(255, 0, 64, 0.5);
 }
 
 .disclaimer p {
@@ -445,7 +236,7 @@ main {
     line-height: 1.8;
 }
 
-/* Footer - Cyberpunk Style */
+/* Footer */
 footer {
     background: var(--dark-bg);
     color: var(--text-color);
@@ -453,7 +244,6 @@ footer {
     text-align: center;
     margin-top: 50px;
     border-top: 2px solid var(--primary-color);
-    box-shadow: 0 -5px 20px rgba(255, 0, 64, 0.2);
 }
 
 footer p {
@@ -477,10 +267,6 @@ footer p {
         gap: 15px;
     }
 
-    .product-card {
-        padding: 20px;
-    }
-
     .category h3 {
         font-size: 1.5rem;
     }
@@ -501,52 +287,5 @@ footer p {
 
     .container {
         padding: 0 15px;
-    }
-}
-
-/* Loading Animation (optional) */
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(20px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-.product-card {
-    animation: fadeIn 0.5s ease-out;
-}
-
-/* Utility Classes */
-.text-center {
-    text-align: center;
-}
-
-.mt-4 {
-    margin-top: 2rem;
-}
-
-.mb-4 {
-    margin-bottom: 2rem;
-}
-
-/* Print Styles */
-@media print {
-    header {
-        background: white;
-        color: black;
-    }
-
-    .amazon-link {
-        background: white;
-        color: black;
-        border: 1px solid black;
-    }
-
-    .product-card {
-        page-break-inside: avoid;
     }
 }
