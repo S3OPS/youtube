@@ -123,13 +123,15 @@ main {
 .product-image {
     width: 100%;
     height: 250px;
-    object-fit: cover;
+    object-fit: contain;
     background: var(--light-bg);
     border-bottom: 1px solid var(--border-color);
     /* Optimize image loading performance */
     aspect-ratio: 1 / 1;
     image-rendering: -webkit-optimize-contrast;
     image-rendering: crisp-edges;
+    /* Smooth transition for image loading */
+    transition: opacity 0.3s ease-in;
 }
 
 /* Skeleton loading effect for images */

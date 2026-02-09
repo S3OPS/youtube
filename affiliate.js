@@ -1,6 +1,6 @@
 /**
  * Amazon Affiliate Link Manager
- * Automatically adds affiliate tracking to Amazon links
+ * Automatically adds affiliate tracking to Amazon links and optimizes image loading
  */
 
 (function() {
@@ -48,6 +48,35 @@
             } catch (error) {
                 console.error('Error processing link:', error);
             }
+        });
+
+        // Optimize image loading
+        optimizeImageLoading();
+    }
+
+    function optimizeImageLoading() {
+        const images = document.querySelectorAll('.product-image');
+        
+        images.forEach(img => {
+            // Add error handler for failed image loads
+            img.addEventListener('error', function() {
+                console.warn('Failed to load image:', this.src);
+                // Use a placeholder or retry
+                this.style.backgroundColor = '#f0f0f0';
+                this.style.display = 'flex';
+                this.style.alignItems = 'center';
+                this.style.justifyContent = 'center';
+                this.alt = 'Image unavailable';
+            });
+
+            // Add load handler for successful loads
+            img.addEventListener('load', function() {
+                this.style.opacity = '1';
+                this.style.transition = 'opacity 0.3s ease-in';
+            });
+
+            // Set initial opacity for fade-in effect
+            img.style.opacity = '0.5';
         });
     }
 
