@@ -126,6 +126,31 @@ main {
     object-fit: cover;
     background: var(--light-bg);
     border-bottom: 1px solid var(--border-color);
+    /* Optimize image loading performance */
+    aspect-ratio: 1 / 1;
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: crisp-edges;
+}
+
+/* Skeleton loading effect for images */
+.product-image:not([src]) {
+    background: linear-gradient(
+        90deg,
+        var(--light-bg) 0%,
+        #e0e0e0 50%,
+        var(--light-bg) 100%
+    );
+    background-size: 200% 100%;
+    animation: skeleton-loading 1.5s ease-in-out infinite;
+}
+
+@keyframes skeleton-loading {
+    0% {
+        background-position: 200% 0;
+    }
+    100% {
+        background-position: -200% 0;
+    }
 }
 
 .product-content {
