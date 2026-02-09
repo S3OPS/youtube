@@ -16,7 +16,7 @@
     function initAffiliateLinks() {
         // Check if config is loaded
         if (typeof window.AFFILIATE_CONFIG === 'undefined') {
-            console.error('Affiliate configuration not loaded');
+            console.error('Affiliate configuration not loaded. Ensure config.js is included before affiliate.js');
             return;
         }
 
