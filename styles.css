@@ -260,7 +260,7 @@ main {
 }
 
 .product-image-link::after {
-    content: '🔗 Click to View';
+    content: 'Click to View';
     position: absolute;
     top: 50%;
     left: 50%;

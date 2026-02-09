@@ -40,8 +40,10 @@
             
             if (!firstImage || !firstLink) return;
             
-            // Get category name without emoji
-            const categoryText = heading.textContent.trim().replace(/[^\w\s-]/g, '').trim();
+            // Get category name without emoji (remove emoji characters specifically)
+            const categoryText = heading.textContent.trim()
+                .replace(/[\u{1F300}-\u{1F9FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]/gu, '')
+                .trim();
             
             // Create preview thumbnail
             const preview = document.createElement('img');
@@ -53,6 +55,7 @@
             const previewLink = document.createElement('a');
             previewLink.href = firstLink.href;
             previewLink.className = 'category-preview-link';
+            previewLink.setAttribute('aria-label', 'View first product in ' + categoryText + ' category on Amazon');
             previewLink.appendChild(preview);
             
             // Replace heading content
