@@ -5,7 +5,7 @@
 const AFFILIATE_CONFIG = {
     // Your Amazon Associates Tracking ID (also known as Associate Tag)
     // You can find this in your Amazon Associates account
-    affiliateId: 'YOUR-AFFILIATE-ID-20',
+    affiliateId: 'pablochakone-20',
     
     // Optional: Amazon store domain (for different countries)
     // Examples: 'amazon.com', 'amazon.co.uk', 'amazon.de', 'amazon.ca', etc.
