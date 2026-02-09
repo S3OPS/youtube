@@ -56,20 +56,23 @@
 
     function optimizeImageLoading() {
         const images = document.querySelectorAll('.product-image');
+        const maxRetries = 2;
         
         images.forEach(img => {
-            let retryCount = 0;
-            const maxRetries = 2;
+            // Store retry count as a data attribute for persistence
+            img.setAttribute('data-retry-count', '0');
             
             // Add error handler for failed image loads
             img.addEventListener('error', function() {
-                console.warn('Failed to load image:', this.src);
+                const retryCount = parseInt(this.getAttribute('data-retry-count') || '0');
+                console.warn('Failed to load image:', this.src, '(attempt ' + (retryCount + 1) + ')');
                 
                 if (retryCount < maxRetries) {
-                    retryCount++;
+                    // Increment retry count
+                    this.setAttribute('data-retry-count', (retryCount + 1).toString());
                     // Try to reload the image with a cache-busting parameter
                     const originalSrc = this.src.split('?')[0];
-                    this.src = originalSrc + '?retry=' + retryCount;
+                    this.src = originalSrc + '?retry=' + (retryCount + 1);
                 } else {
                     // After retries, show placeholder
                     this.style.backgroundColor = '#f0f0f0';
