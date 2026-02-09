@@ -76,6 +76,15 @@ main {
     margin: 0 auto;
 }
 
+.info-banner {
+    margin-top: 15px;
+    padding: 15px;
+    background: #fff3cd;
+    border-radius: 8px;
+    color: #856404;
+    border-left: 4px solid #ffc107;
+}
+
 /* Categories */
 .category {
     margin-bottom: 70px;
