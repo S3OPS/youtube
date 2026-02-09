@@ -154,6 +154,9 @@ main {
     text-transform: uppercase;
     text-shadow: 0 0 10px rgba(255, 0, 64, 0.5);
     position: relative;
+    display: flex;
+    align-items: center;
+    gap: 15px;
 }
 
 .category h3::after {
@@ -165,6 +168,36 @@ main {
     height: 2px;
     background: var(--primary-color);
     box-shadow: 0 0 10px var(--primary-color);
+}
+
+/* Category Preview Thumbnail */
+.category-preview-link {
+    display: inline-block;
+    width: 60px;
+    height: 60px;
+    border: 2px solid var(--primary-color);
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 0 15px rgba(255, 0, 64, 0.4);
+    transition: all 0.3s ease;
+    flex-shrink: 0;
+}
+
+.category-preview-link:hover {
+    transform: scale(1.1);
+    box-shadow: 0 0 25px rgba(255, 0, 64, 0.8);
+    border-color: var(--secondary-color);
+}
+
+.category-preview-thumb {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.category-title-text {
+    flex: 1;
 }
 
 /* Product Grid */
@@ -218,6 +251,38 @@ main {
     animation-duration: 1s;
 }
 
+/* Product Image Link Wrapper */
+.product-image-link {
+    display: block;
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+}
+
+.product-image-link::after {
+    content: '🔗 Click to View';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(0, 0, 0, 0.85);
+    color: var(--primary-color);
+    padding: 10px 20px;
+    border-radius: 5px;
+    border: 2px solid var(--primary-color);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    font-size: 0.9rem;
+    font-weight: bold;
+    text-shadow: 0 0 10px rgba(255, 0, 64, 0.8);
+    pointer-events: none;
+    white-space: nowrap;
+}
+
+.product-image-link:hover::after {
+    opacity: 1;
+}
+
 .product-image {
     width: 100%;
     height: 250px;
@@ -225,10 +290,14 @@ main {
     background: #0a0a0a;
     border-bottom: 2px solid var(--border-color);
     filter: brightness(0.9) contrast(1.1);
+    transition: all 0.3s ease;
+    display: block;
 }
 
-.product-card:hover .product-image {
+.product-card:hover .product-image,
+.product-image-link:hover .product-image {
     filter: brightness(1) contrast(1.2);
+    transform: scale(1.05);
 }
 
 .product-content {
