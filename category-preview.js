@@ -58,15 +58,9 @@
             previewLink.setAttribute('aria-label', 'View first product in ' + categoryText + ' category on Amazon');
             previewLink.appendChild(preview);
             
-            // Replace heading content
+            // Replace heading content with just the preview image (no text)
             heading.innerHTML = '';
             heading.appendChild(previewLink);
-            
-            // Add text after the preview
-            const textSpan = document.createElement('span');
-            textSpan.textContent = categoryText;
-            textSpan.className = 'category-title-text';
-            heading.appendChild(textSpan);
         });
         
         console.log(`Processed ${categories.length} category headers`);
