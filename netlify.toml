@@ -4,13 +4,6 @@
 [build]
   # No build command needed for static site
   publish = "."
-  
-[[redirects]]
-  # Redirect all routes to index.html for SPA-like behavior (optional)
-  from = "/*"
-  to = "/index.html"
-  status = 200
-  force = false
 
 [[headers]]
   # Security headers
