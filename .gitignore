@@ -55,3 +55,6 @@ credentials.json
 # Logs
 *.log
 logs/
+
+# Images directory (empty files)
+images/
