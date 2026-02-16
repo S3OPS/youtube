@@ -91,8 +91,11 @@ For advanced users wanting full control:
 ## 📋 Features
 
 - ✅ **96 Product Links** - Curated everyday essentials across 12 categories
+- ✅ **Category Navigation** - Quick jump links to browse products by category
+- ✅ **Back to Top Button** - Smooth scroll navigation for better user experience
 - ✅ **Automatic Affiliate Deep Linking** - All Amazon links automatically include your affiliate ID
 - ✅ **Responsive Design** - Works perfectly on desktop, tablet, and mobile
+- ✅ **Smooth Animations** - Modern fade-in and hover effects for enhanced UX
 - ✅ **No Backend Required** - Pure HTML/CSS/JavaScript
 - ✅ **Easy to Customize** - Simple configuration file
 - ✅ **Fast Loading** - Optimized for performance
@@ -149,6 +152,25 @@ amazonDomain: 'amazon.co.uk',  // For UK
 // or 'amazon.de' for Germany
 // or 'amazon.ca' for Canada
 ```
+
+## 📦 Product Categories
+
+The site features 12 comprehensive product categories with 96 total products:
+
+1. **🍳 Kitchen Essentials** - Cookware, appliances, and kitchen tools
+2. **🧴 Personal Care** - Grooming, hygiene, and beauty products
+3. **🏡 Home Essentials** - Home improvement and organization
+4. **📱 Electronics** - Tech gadgets and accessories
+5. **🏋️ Fitness & Sports** - Exercise equipment and fitness gear
+6. **👶 Baby & Kids** - Children's products and toys
+7. **🖊️ Office Supplies** - Stationery and office essentials
+8. **🐾 Pet Supplies** - Pet care products and accessories
+9. **🚗 Automotive** - Car care and accessories
+10. **🌱 Garden & Outdoor** - Gardening tools and outdoor products
+11. **💊 Health & Wellness** - Health monitoring and wellness products
+12. **✈️ Travel & Luggage** - Travel accessories and organizers
+
+Use the category navigation menu to quickly jump to any category section.
 
 ## 📁 File Structure
 

@@ -58,6 +58,9 @@ affiliateId: 'mystore-20',  // Replace with your ID
 
 ✅ 96 curated everyday essential products  
 ✅ 12 product categories  
+✅ Category navigation with quick jump links  
+✅ Back-to-top button for easy navigation  
+✅ Smooth scroll and modern animations  
 ✅ Automatic affiliate link deep linking  
 ✅ Responsive mobile-friendly design  
 ✅ Click tracking support  

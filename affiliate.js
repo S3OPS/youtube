@@ -95,4 +95,32 @@
         });
     }
 
+    // Back to Top Button Functionality
+    function initBackToTop() {
+        const backToTopButton = document.getElementById('backToTop');
+        const SCROLL_THRESHOLD = 300; // Pixels to scroll before showing button
+        
+        if (!backToTopButton) return;
+
+        // Show/hide button based on scroll position
+        window.addEventListener('scroll', function() {
+            if (window.pageYOffset > SCROLL_THRESHOLD) {
+                backToTopButton.classList.add('visible');
+            } else {
+                backToTopButton.classList.remove('visible');
+            }
+        });
+
+        // Scroll to top when clicked
+        backToTopButton.addEventListener('click', function() {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        });
+    }
+
+    // Initialize back to top functionality
+    initBackToTop();
+
 })();
