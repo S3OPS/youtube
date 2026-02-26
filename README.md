@@ -91,6 +91,8 @@ For advanced users wanting full control:
 ## 📋 Features
 
 - ✅ **96 Product Links** - Curated everyday essentials across 12 categories
+- ✅ **Live Product Search** - Instantly filter products by name or description
+- ✅ **Dark Mode** - Toggle between light and dark themes (preference saved locally)
 - ✅ **Category Navigation** - Quick jump links to browse products by category
 - ✅ **Back to Top Button** - Smooth scroll navigation for better user experience
 - ✅ **Automatic Affiliate Deep Linking** - All Amazon links automatically include your affiliate ID
@@ -99,7 +101,7 @@ For advanced users wanting full control:
 - ✅ **No Backend Required** - Pure HTML/CSS/JavaScript
 - ✅ **Easy to Customize** - Simple configuration file
 - ✅ **Fast Loading** - Optimized for performance
-- ✅ **SEO Friendly** - Proper meta tags and semantic HTML
+- ✅ **SEO Friendly** - Proper meta tags, Open Graph, and Twitter Card support
 
 ## 🛠️ Customization
 
@@ -180,6 +182,7 @@ Use the category navigation menu to quickly jump to any category section.
 ├── styles.css          # CSS styling
 ├── config.js           # Affiliate configuration
 ├── affiliate.js        # Automatic link processing
+├── enhancements.js     # Live search and dark mode
 ├── README.md           # This file
 ├── netlify.toml        # Netlify configuration
 └── vercel.json         # Vercel configuration
