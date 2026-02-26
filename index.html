@@ -5,14 +5,26 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Discover essential products under $50 on Amazon. Quality everyday items that everyone needs - kitchen, personal care, home, and electronics.">
     <meta name="referrer" content="no-referrer">
+    <!-- Open Graph / Social sharing -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Daily Essentials Under $50 - Best Selling Amazon Products">
+    <meta property="og:description" content="Discover essential products under $50 on Amazon. 96 curated everyday items across 12 categories.">
+    <meta property="og:url" content="https://s3ops.github.io/youtube/">
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="Daily Essentials Under $50 - Best Selling Amazon Products">
+    <meta name="twitter:description" content="Discover essential products under $50 on Amazon. 96 curated everyday items across 12 categories.">
     <title>Daily Essentials Under $50 - Best Selling Amazon Products</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <header>
-        <div class="container">
-            <h1>🛒 Daily Essentials Under $50</h1>
-            <p class="tagline">Discover affordable everyday essentials that everyone needs</p>
+        <div class="container header-inner">
+            <div class="header-text">
+                <h1>🛒 Daily Essentials Under $50</h1>
+                <p class="tagline">Discover affordable everyday essentials that everyone needs</p>
+            </div>
+            <button id="darkModeToggle" class="dark-mode-toggle" aria-label="Toggle dark mode" title="Toggle dark mode">🌙</button>
         </div>
     </header>
 
@@ -21,6 +33,10 @@
             <h2>Welcome to Daily Essentials</h2>
             <p>Explore our curated collection of affordable, essential products under $50. Each item has been carefully selected based on customer reviews, value for money, and everyday usefulness.</p>
             <p class="info-banner"><strong>📌 Note:</strong> Current prices and product images are available on Amazon. Click "View on Amazon" to see the latest pricing, images, reviews, and product details.</p>
+            <div class="search-container">
+                <input type="search" id="productSearch" class="search-input" placeholder="🔍 Search products..." aria-label="Search products">
+                <span id="searchResultCount" class="search-result-count" aria-live="polite"></span>
+            </div>
         </section>
 
         <!-- Category Navigation -->
@@ -1495,5 +1511,6 @@
 
     <script src="config.js"></script>
     <script src="affiliate.js"></script>
+    <script src="enhancements.js"></script>
 </body>
 </html>

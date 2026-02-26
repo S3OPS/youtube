@@ -13,13 +13,29 @@
     --border-color: #ddd;
     --shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     --hover-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+    --card-bg: #fff;
+    --body-bg: #fff;
+    --footer-bg: #232f3e;
+}
+
+/* Dark Mode Variables */
+body.dark-mode {
+    --text-color: #e0e0e0;
+    --light-bg: #1e1e2e;
+    --border-color: #444;
+    --shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+    --hover-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
+    --card-bg: #2a2a3e;
+    --body-bg: #16161d;
+    --footer-bg: #0d0d14;
 }
 
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     line-height: 1.6;
     color: var(--text-color);
-    background-color: #fff;
+    background-color: var(--body-bg);
+    transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 .container {
@@ -87,7 +103,7 @@ main {
 
 /* Category Navigation */
 .category-nav {
-    background: white;
+    background: var(--card-bg);
     padding: 30px;
     border-radius: 12px;
     box-shadow: var(--shadow);
@@ -269,7 +285,7 @@ html {
 
 /* Product Cards */
 .product-card {
-    background: white;
+    background: var(--card-bg);
     border: 1px solid var(--border-color);
     border-radius: 12px;
     padding: 0;
@@ -574,6 +590,10 @@ footer p {
     margin-bottom: 2rem;
 }
 
+.hidden {
+    display: none !important;
+}
+
 /* Print Styles */
 @media print {
     header {
@@ -589,5 +609,109 @@ footer p {
 
     .product-card {
         page-break-inside: avoid;
+    }
+}
+
+/* ── Header Layout ──────────────────────────────────────────────────────────── */
+.header-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+.header-text {
+    flex: 1;
+}
+
+/* ── Dark Mode Toggle ───────────────────────────────────────────────────────── */
+.dark-mode-toggle {
+    background: rgba(255, 255, 255, 0.2);
+    border: 2px solid rgba(255, 255, 255, 0.5);
+    color: white;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    font-size: 1.3rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    flex-shrink: 0;
+    line-height: 1;
+    padding: 0;
+}
+
+.dark-mode-toggle:hover {
+    background: rgba(255, 255, 255, 0.35);
+    transform: scale(1.1);
+}
+
+/* Dark mode overrides */
+body.dark-mode .intro,
+body.dark-mode .category-nav,
+body.dark-mode .disclaimer {
+    background: var(--light-bg);
+}
+
+body.dark-mode .product-image-placeholder {
+    background: linear-gradient(135deg, #2a2a3e 0%, #32324a 100%);
+    border-color: var(--border-color);
+}
+
+body.dark-mode .product-card:hover .product-image-placeholder {
+    background: linear-gradient(135deg, #32324a 0%, #3a3a58 100%);
+}
+
+body.dark-mode footer {
+    background: var(--footer-bg);
+}
+
+/* ── Search Bar ─────────────────────────────────────────────────────────────── */
+.search-container {
+    margin-top: 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.search-input {
+    width: 100%;
+    max-width: 480px;
+    padding: 12px 20px;
+    font-size: 1rem;
+    border: 2px solid var(--border-color);
+    border-radius: 30px;
+    outline: none;
+    background: var(--card-bg);
+    color: var(--text-color);
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.search-input:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(255, 153, 0, 0.2);
+}
+
+.search-result-count {
+    font-size: 0.9rem;
+    color: #666;
+    min-width: 130px;
+}
+
+body.dark-mode .search-result-count {
+    color: #aaa;
+}
+
+@media (max-width: 480px) {
+    .dark-mode-toggle {
+        width: 38px;
+        height: 38px;
+        font-size: 1.1rem;
+    }
+
+    .search-input {
+        font-size: 0.95rem;
     }
 }
